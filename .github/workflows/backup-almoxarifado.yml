@@ -1,0 +1,84 @@
+name: Backup diario criptografado - Almoxarifado
+
+on:
+  schedule:
+    - cron: '35 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: almoxarifado-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Exportar, validar e criptografar banco
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      ALMOX_DATABASE_URL: ${{ secrets.ALMOX_DATABASE_URL }}
+      ALMOX_BACKUP_PASSPHRASE: ${{ secrets.ALMOX_BACKUP_PASSPHRASE }}
+    steps:
+      - name: Conferir configuracao segura
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [[ -z "$ALMOX_DATABASE_URL" || -z "$ALMOX_BACKUP_PASSPHRASE" ]]; then
+            echo "::error::Configure ALMOX_DATABASE_URL e ALMOX_BACKUP_PASSPHRASE em Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          if [[ "${#ALMOX_BACKUP_PASSPHRASE}" -lt 24 ]]; then
+            echo "::error::A senha de criptografia deve ter pelo menos 24 caracteres e ser guardada fora do GitHub."
+            exit 1
+          fi
+
+      - name: Exportar somente as tabelas do Almoxarifado
+        id: export
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          mkdir -p backup
+          STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          export PGSSLMODE=require
+          docker run --rm \
+            --env ALMOX_DATABASE_URL \
+            --env PGSSLMODE \
+            --volume "$PWD/backup:/backup" \
+            postgres:17 \
+            sh -ec 'pg_dump --dbname="$ALMOX_DATABASE_URL" --format=custom --no-owner --no-acl --table="public.alm_*" --file="/backup/almoxarifado.dump"'
+          test -s backup/almoxarifado.dump
+          docker run --rm --volume "$PWD/backup:/backup:ro" postgres:17 \
+            pg_restore --list /backup/almoxarifado.dump > /dev/null
+          echo "Dump gerado e catalogo validado."
+
+      - name: Criptografar e validar integridade
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          DEST="backup/almoxarifado-${{ steps.export.outputs.stamp }}.dump.gpg"
+          printf '%s' "$ALMOX_BACKUP_PASSPHRASE" | \
+            gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase-fd 0 \
+              --symmetric --cipher-algo AES256 --s2k-digest-algo SHA512 \
+              --output "$DEST" backup/almoxarifado.dump
+          ORIGINAL="$(sha256sum backup/almoxarifado.dump | cut -d ' ' -f 1)"
+          RESTORED="$(printf '%s' "$ALMOX_BACKUP_PASSPHRASE" | \
+            gpg --batch --yes --no-tty --pinentry-mode loopback --passphrase-fd 0 \
+                --decrypt "$DEST" | sha256sum | cut -d ' ' -f 1)"
+          test "$ORIGINAL" = "$RESTORED"
+          test -s "$DEST"
+          rm -f backup/almoxarifado.dump
+          echo "Arquivo criptografado e conferido por SHA-256."
+
+      - name: Guardar copia externa como artefato do GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: almoxarifado-${{ steps.export.outputs.stamp }}
+          path: backup/*.dump.gpg
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
