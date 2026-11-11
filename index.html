@@ -1828,9 +1828,25 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
       <input id="auth-password" class="auth-input" type="password" autocomplete="current-password" required minlength="6" placeholder="Digite sua senha">
       <button id="auth-login-btn" class="auth-btn auth-btn-primary" type="submit" style="margin-top:18px">Entrar</button>
       <button id="auth-signup-btn" class="auth-btn auth-btn-secondary" type="button" onclick="signupUser()">Criar usuário</button>
+      <button id="auth-forgot-btn" type="button" onclick="serraForgotPassword()" style="display:block;margin:12px auto 4px;border:0;background:transparent;color:#177a54;font-size:13px;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px">Esqueci minha senha</button>
       <div id="auth-message" class="auth-message" role="status"></div>
     </form>
    </div>
+  </div>
+  <div id="serra-password-modal" role="dialog" aria-modal="true" aria-labelledby="serra-password-title" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(8,20,15,.76);align-items:center;justify-content:center;padding:20px">
+    <form id="serra-password-form" onsubmit="serraSavePassword(event)" style="width:min(100%,420px);background:#fff;color:#183329;padding:28px;border-radius:18px;box-shadow:0 24px 80px #0005">
+      <h2 id="serra-password-title" style="margin:0 0 8px;font-size:22px;font-weight:800">Alterar senha</h2>
+      <p id="serra-password-description" style="font-size:13px;color:#546960;margin:0 0 18px">Escolha uma nova senha para sua conta.</p>
+      <label for="serra-password-new" style="display:block;font-weight:700;font-size:13px;margin-bottom:6px">Nova senha</label>
+      <input id="serra-password-new" class="auth-input" type="password" autocomplete="new-password" minlength="10" required placeholder="Mínimo de 10 caracteres" style="width:100%;box-sizing:border-box">
+      <label for="serra-password-confirm" style="display:block;font-weight:700;font-size:13px;margin:14px 0 6px">Confirmar nova senha</label>
+      <input id="serra-password-confirm" class="auth-input" type="password" autocomplete="new-password" minlength="10" required placeholder="Repita a nova senha" style="width:100%;box-sizing:border-box">
+      <div id="serra-password-status" role="status" aria-live="polite" style="font-size:13px;margin-top:12px;min-height:18px"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button id="serra-password-cancel" type="button" onclick="serraClosePasswordModal()" class="auth-btn auth-btn-secondary" style="flex:1">Cancelar</button>
+        <button id="serra-password-save" type="submit" class="auth-btn auth-btn-primary" style="flex:1">Salvar senha</button>
+      </div>
+    </form>
   </div>
   <aside id="sync-status" class="sync-loading" role="status" aria-live="polite" aria-atomic="true"> <span id="realtime-status" class="ml-2 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-500" title="Atualização automática">
           <span class="inline-block h-2 w-2 rounded-full bg-slate-300"></span> Atualização automática
@@ -1855,6 +1871,7 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
         <span id="user-email">Usuário</span>
         <span id="user-role" class="user">Usuário</span>
        </div>
+       <button id="change-password-btn" type="button" onclick="serraOpenPasswordModal(false)" class="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-300" style="margin-right:6px" title="Alterar a própria senha">Alterar senha</button>
        <button id="logout-btn" type="button" class="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-300" onclick="logoutUser()" aria-label="Sair da conta"><i data-lucide="log-out" class="mr-1 inline-block h-4 w-4"></i>Sair</button>
       </div>
       <button id="fullscreen-btn" data-template-id="fullscreen-btn" type="button" class="canva-button inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" aria-label="Tela cheia" aria-pressed="false" onclick="toggleFullscreen()"> <i data-lucide="maximize-2" class="h-4 w-4"></i><span data-template-id="fullscreen-label" class="canva-text">Tela cheia</span><span data-template-id="fullscreen-exit-label" class="canva-text hidden">Sair da tela cheia</span></button>
@@ -4557,10 +4574,111 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
       location.reload();
     }
 
+
+    // Serra Azul BF: recuperação e troca de senha usando apenas Supabase Auth.
+    let serraPasswordRecoveryMode = false;
+    function serraOpenPasswordModal(recoveryMode) {
+      serraPasswordRecoveryMode = !!recoveryMode;
+      const modal = document.getElementById("serra-password-modal");
+      const frm = document.getElementById("serra-password-form");
+      if (!modal || !frm) return;
+      frm.reset();
+      const status = document.getElementById("serra-password-status");
+      status.textContent = "";
+      const title = document.getElementById("serra-password-title");
+      title.textContent = recoveryMode ? "Criar nova senha" : "Alterar minha senha";
+      document.getElementById("serra-password-description").textContent =
+        recoveryMode ? "Link de recuperação validado. Defina uma senha nova para voltar a entrar." :
+        "Altere somente a senha da conta conectada.";
+      document.getElementById("serra-password-cancel").style.display = recoveryMode ? "none" : "";
+      modal.style.display = "flex";
+      document.getElementById("serra-password-new").focus();
+    }
+    function serraClosePasswordModal() {
+      if (serraPasswordRecoveryMode) return;
+      document.getElementById("serra-password-modal").style.display = "none";
+    }
+    async function serraForgotPassword() {
+      const email = String(document.getElementById("auth-email")?.value || "").trim().toLowerCase();
+      if (!/^[^\s@]+@bomfuturo\.com\.br$/.test(email)) {
+        setAuthMessage("Digite seu e-mail corporativo no campo Usuário / E-mail para recuperar a senha.");
+        document.getElementById("auth-email")?.focus();
+        return;
+      }
+      const btn = document.getElementById("auth-forgot-btn");
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      try {
+        const redirectTo = location.origin + location.pathname;
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) throw error;
+        setAuthMessage("Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha. Verifique também a caixa de spam.", "success");
+      } catch (err) {
+        console.error("Falha ao solicitar recuperação:", err);
+        setAuthMessage("Não foi possível enviar o link agora. Confira o e-mail e tente novamente mais tarde. Se persistir, contate o administrador.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Esqueci minha senha";
+      }
+    }
+    async function serraSavePassword(event) {
+      event.preventDefault();
+      const pass = document.getElementById("serra-password-new").value;
+      const confirm = document.getElementById("serra-password-confirm").value;
+      const msg = document.getElementById("serra-password-status");
+      const btn = document.getElementById("serra-password-save");
+      if (pass.length < 10) { msg.style.color="#b42318"; msg.textContent="Use pelo menos 10 caracteres."; return; }
+      if (pass !== confirm) { msg.style.color="#b42318"; msg.textContent="As senhas não coincidem."; return; }
+      btn.disabled=true; msg.style.color="#547565"; msg.textContent="Atualizando com segurança...";
+      try {
+        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !sessionData?.session?.user) throw new Error("Sua sessão expirou. Solicite outro link de recuperação.");
+        const { error } = await supabaseClient.auth.updateUser({ password: pass });
+        if (error) throw error;
+        msg.style.color="#087547"; msg.textContent="Senha atualizada. Faça login novamente.";
+        document.getElementById("serra-password-form").reset();
+        await supabaseClient.auth.signOut();
+        history.replaceState(null,"",location.pathname);
+        setTimeout(()=>location.reload(),900);
+      } catch (err) {
+        console.error("Falha ao alterar senha:",err);
+        msg.style.color="#b42318";
+        msg.textContent=String(err?.message||"Não foi possível alterar a senha.");
+      } finally { btn.disabled=false; }
+    }
+    async function serraHandleRecoveryLink() {
+      const query = new URLSearchParams(location.search);
+      const hash = new URLSearchParams(location.hash.slice(1));
+      const isRecovery = query.get("type")==="recovery" || hash.get("type")==="recovery";
+      if (!isRecovery) return false;
+      try {
+        let error;
+        if (query.has("token_hash")) {
+          ({ error } = await supabaseClient.auth.verifyOtp({ token_hash:query.get("token_hash"), type:"recovery" }));
+        } else if (hash.has("access_token") && hash.has("refresh_token")) {
+          ({ error } = await supabaseClient.auth.setSession({
+            access_token:hash.get("access_token"),refresh_token:hash.get("refresh_token")
+          }));
+        } else if (query.has("code")) {
+          ({ error } = await supabaseClient.auth.exchangeCodeForSession(query.get("code")));
+        } else { throw new Error("Link incompleto. Solicite uma nova recuperação."); }
+        if (error) throw error;
+        history.replaceState(null,"",location.pathname);
+        serraOpenPasswordModal(true);
+        return true;
+      } catch(err) {
+        history.replaceState(null,"",location.pathname);
+        setAuthMessage("O link de recuperação expirou ou é inválido. Digite seu e-mail e solicite outro link.");
+        console.warn("Link de recuperação inválido:",err?.message);
+        return true;
+      }
+    }
+
     async function startApplication() {
       if (window.lucide) lucide.createIcons();
       document.body.classList.add("auth-locked");
       const authScreen = document.getElementById("auth-screen");
+      if (await serraHandleRecoveryLink()) return;
       try {
         const { data, error } = await supabaseClient.auth.getSession();
         if (error) throw error;
