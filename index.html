@@ -6084,10 +6084,35 @@ window.addEventListener('message', async function(event){
   $('sa-tire-kpi-total').textContent=records.length;$('sa-tire-kpi-sent').textContent=total;$('sa-tire-kpi-pending').textContent=total-returned;$('sa-tire-kpi-returned').textContent=returned;
   const rows=records.filter(r=>(!status||getStatus(r)===status)&&(!q||[r.nf,r.patrimony,r.supplier,r.owner,...r.items.flatMap(x=>[x.measure,x.brand,x.identification,x.defect])].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   $('sa-tire-empty').hidden=rows.length>0;
-  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireDelete('${r.id}')">Arquivar</button>`:""}</td></tr>`}).join('');
+  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireEdit('${r.id}')">✎ Editar</button><button type="button" onclick="saTireDelete('${r.id}')">Excluir</button>`:""}</td></tr>`}).join('');
  };
  let editing=null;
  window.saTireOpenForm=function(){editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
+ window.saTireEdit=function(id){
+  if(!isAdmin())return alert('Somente o administrador pode editar remessas.');
+  const r=byId(id);if(!r)return alert('Remessa não encontrada. Atualize a lista.');
+  editing=id;
+  $('sa-tire-form').reset();
+  $('sa-tire-form-items').replaceChildren();
+  $('sa-tire-form-title').textContent='Editar Remessa de Pneus · NF '+r.nf;
+  $('sa-tire-date').value=r.date||dateToday();
+  $('sa-tire-supplier').value=r.supplier||'';
+  $('sa-tire-patrimony').value=r.patrimony||'';
+  $('sa-tire-nf').value=r.nf||'';
+  $('sa-tire-owner').value=r.owner||'';
+  $('sa-tire-notes').value=r.notes||'';
+  r.items.forEach(item=>saTireAddItem(item));
+  if(r.items.some(x=>x.returned>0)){
+   // O banco impede alterar a identidade dos pneus já retornados.
+   const message=document.createElement('p');
+   message.id='sa-tire-edit-notice';
+   message.style.cssText='color:#ffd5a2;font-size:12px;margin:10px 0;';
+   message.textContent='Atenção: esta remessa possui retornos. A identificação, marca e medida dos pneus já retornados não podem ser modificadas.';
+   $('sa-tire-form-items').prepend(message);
+  }
+  $('sa-tire-form-modal').classList.remove('hidden');
+ };
+
  window.saTireCloseForm=function(){$('sa-tire-form-modal').classList.add('hidden')};
  window.saTireRefreshItemLabels=function(){const all=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')];all.forEach((card,i)=>{const label=card.querySelector('.sa-tire-item-number');if(label)label.textContent='PNEU '+String(i+1).padStart(2,'0')});const info=$('sa-tire-items-counter');if(info)info.textContent=all.length+' '+(all.length===1?'item cadastrado':'itens cadastrados')};
  window.saTireRemoveItem=function(button){const all=$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item');if(all.length<=1){alert('A remessa precisa ter pelo menos um pneu.');return;}button.closest('.sa-tire-form-item')?.remove();saTireRefreshItemLabels();};
@@ -6102,7 +6127,15 @@ window.addEventListener('message', async function(event){
   const args={p_sent_date:$('sa-tire-date').value,p_supplier:$('sa-tire-supplier').value.trim(),p_patrimony:$('sa-tire-patrimony').value.trim(),p_out_nf:$('sa-tire-nf').value.trim(),p_responsible:$('sa-tire-owner').value.trim(),p_notes:$('sa-tire-notes').value.trim(),p_items:items};
   if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible)return alert('Preencha os campos obrigatórios.');
   saving=true;const btn=$('sa-tire-form').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Salvando...';
-  try{const {error}=await supabaseClient.rpc('sa_tire_create_shipment',args);if(error)throw error;saTireCloseForm();await saTireLoad();alert('Remessa de pneus salva no Supabase.');}
+  try{
+   const isEdit=!!editing;
+   const operation=isEdit?'sa_tire_update_shipment':'sa_tire_create_shipment';
+   const request=isEdit?{...args,p_shipment_id:editing}:args;
+   const {error}=await supabaseClient.rpc(operation,request);
+   if(error)throw error;
+   editing=null;saTireCloseForm();await saTireLoad();
+   alert(isEdit?'Remessa atualizada com sucesso.':'Remessa de pneus salva no Supabase.');
+  }
   catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
   finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
  };
@@ -6124,9 +6157,9 @@ window.addEventListener('message', async function(event){
  window.saTireDelete=async function(id){
   if(!isAdmin())return alert('Somente o administrador pode arquivar remessas.');
   const r=byId(id);if(!r)return;
-  const motivo=prompt('Justificativa para arquivar a NF '+r.nf+' (mínimo de 8 caracteres):');
-  if(motivo===null)return;if(motivo.trim().length<8)return alert('Informe a justificativa.');
-  if(!confirm('Confirmar arquivamento? O histórico será preservado.'))return;
+  const motivo=prompt('Excluir a remessa NF '+r.nf+' da lista? Informe o motivo (mínimo de 8 caracteres). O registro ficará arquivado para auditoria.');
+  if(motivo===null)return;if(motivo.trim().length<8)return alert('Informe uma justificativa com pelo menos 8 caracteres.');
+  if(!confirm('Confirmar exclusão da lista da NF '+r.nf+'? A operação arquivará a remessa e preservará o histórico no Supabase.'))return;
   const {error}=await supabaseClient.rpc('sa_tire_archive_shipment',{p_shipment_id:id,p_reason:motivo.trim()});
   if(error)return alert('Não foi possível arquivar: '+error.message);
   await saTireLoad();
