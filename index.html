@@ -5373,9 +5373,19 @@ body.sa-dark .sa-dds-shell{background:#080a09!important;border-color:#252b27!imp
     f.dataset.loaded='1';
   }
   function $(id){return document.getElementById(id)}
+  function getOverlayHost(){
+    const shell=$('app-shell');
+    return shell && (document.fullscreenElement===shell || shell.classList.contains('is-fullscreen')) ? shell : document.body;
+  }
+  function placePanel(){
+    const panel=$('sa-almox-module');
+    const host=getOverlayHost();
+    if(panel && host && panel.parentElement!==host) host.appendChild(panel);
+  }
   let lastScroll=0;
   function show(on){
     const panel=$('sa-almox-module');if(!panel)return;
+    placePanel();
     const alreadyOpen=panel.classList.contains('sa-almox-open');
     if(on){
       if(!alreadyOpen){lastScroll=window.scrollY||0;document.body.style.setProperty('--sa-almox-locked-top',(-lastScroll)+'px');}
@@ -5403,10 +5413,16 @@ body.sa-dark .sa-dds-shell{background:#080a09!important;border-color:#252b27!imp
     const wrapped=function(){show(false);return f.apply(this,arguments)};
     wrapped.__saAlmPatched=true;window[name]=wrapped;
   }
+  function refreshPanelHost(){placePanel();}
   function init(){
-    // Move para body: evita clipping por main / backdrop / transform do Liquid Glass.
-    const panel=$('sa-almox-module');
-    if(panel&&panel.parentElement!==document.body)document.body.appendChild(panel);
+    // Fora de tela cheia, o painel fica no body; em fullscreen, dentro do app-shell.
+    placePanel();
+    const shell=$('app-shell');
+    if(shell && window.MutationObserver){
+      new MutationObserver(refreshPanelHost).observe(shell,{attributes:true,attributeFilter:['class']});
+    }
+    document.addEventListener('fullscreenchange',function(){setTimeout(refreshPanelHost,0);});
+    window.addEventListener('resize',refreshPanelHost);
     ['centralOpenCompras','centralShowHome','saDDSOpen'].forEach(patch);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
