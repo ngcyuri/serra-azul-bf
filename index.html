@@ -2357,15 +2357,7 @@ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
   background:linear-gradient(180deg, rgba(0,0,0,0), rgba(10,18,18,.18))!important;
 }
 </style>
-<style id="sa-tire-docs-styles">
-.sa-tire-docs{margin:18px 0 8px;padding:20px;border:1px solid rgba(184,229,197,.19);border-radius:19px;background:linear-gradient(130deg,rgba(255,255,255,.09),rgba(255,255,255,.025));backdrop-filter:blur(18px);box-shadow:inset 0 1px rgba(255,255,255,.075)}
-.sa-tire-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.sa-tire-docs small{color:#a0cbb0;font-size:10px}.sa-tire-docs h3{color:#f4fff7!important;margin:5px 0!important;font-size:17px!important}.sa-tire-docs p{color:#b9d0c2!important;font-size:12px!important;margin:6px 0!important}
-.sa-tire-doc-upload{padding:10px 14px;border-radius:12px;background:rgba(56,139,88,.42);border:1px solid rgba(170,231,190,.34);color:#eaffef;font-weight:700;font-size:12px;cursor:pointer}
-.sa-tire-doc-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;margin-top:9px;background:rgba(255,255,255,.04);border:1px solid rgba(178,222,191,.14);border-radius:12px}
-.sa-tire-doc-info{display:flex;flex-direction:column;gap:5px;overflow-wrap:anywhere;min-width:0}.sa-tire-doc-info strong{font-size:12px;color:#f4fff7}.sa-tire-doc-actions{display:flex;gap:7px}
-.sa-tire-doc-actions button{padding:8px 12px;border-radius:9px;background:rgba(255,255,255,.065);border:1px solid rgba(178,222,191,.25);color:#eaffee;font-size:11px;cursor:pointer}.sa-tire-doc-actions button:last-child{color:#ffc2bd}
-@media(max-width:600px){.sa-tire-docs{padding:14px}.sa-tire-doc-row{align-items:flex-start;flex-direction:column}}
-</style>
+
 <link rel="stylesheet" href="./remessas-arquivos.css?v=20261117">
 </head>
  <body data-template-id="__page-root" class="w-full full-vh bg-slate-50" style="background: rgb(241, 245, 249);">
@@ -6114,7 +6106,7 @@ window.addEventListener('message', async function(event){
   catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
   finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
  };
- window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join('');$('sa-tire-detail-content').innerHTML=html+`<section class="sa-tire-docs"><div class="sa-tire-docs-head"><div><small>ARQUIVOS DA REMESSA</small><h3>📁 Documentos da Remessa</h3><p>Notas fiscais, comprovantes e imagens</p></div><label class="sa-tire-doc-upload">＋ Adicionar arquivos<input id="sa-tire-doc-input" type="file" hidden multiple accept=".pdf,.xml,.jpg,.jpeg,.png,.webp" onchange="saTireDocsUpload(event)"></label></div><p id="sa-tire-doc-msg" role="status">Carregando...</p><div id="sa-tire-doc-list"></div></section>`;$('sa-tire-detail-modal').classList.remove('hidden');saTireDocsLoad(id)};
+ window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join('');$('sa-tire-detail-content').innerHTML=html;$('sa-tire-detail-modal').classList.remove('hidden')};
  window.saTireReturn=async function(index){
   if(saving||!active())return;
   const r=byId($('sa-tire-detail-modal').dataset.id),x=r?.items[index];if(!x)return;
@@ -6128,65 +6120,6 @@ window.addEventListener('message', async function(event){
   finally{saving=false}
  };
 
- const saTireDocsBucket='sa-tire-attachments';
- let saDocsUploading=false;
- function saDocMsg(s){const e=$('sa-tire-doc-msg');if(e)e.textContent=s}
- window.saTireDocsLoad=async function(id){
-  const holder=$('sa-tire-doc-list');
-  if(!holder||$('sa-tire-detail-modal')?.dataset.id!==id)return;
-  holder.replaceChildren();saDocMsg('Carregando documentos...');
-  try{
-   const {data,error}=await supabaseClient.storage.from(saTireDocsBucket).list(id,{limit:100,sortBy:{column:'created_at',order:'desc'}});
-   if(error)throw error;
-   if($('sa-tire-detail-modal')?.dataset.id!==id)return;
-   const files=(data||[]).filter(f=>f.id&&f.name);
-   saDocMsg(files.length?files.length+' documento(s) armazenado(s)':'Nenhum documento nesta remessa.');
-   for(const f of files){
-    const path=id+'/'+f.name;
-    const row=document.createElement('div');row.className='sa-tire-doc-row';
-    const info=document.createElement('div');info.className='sa-tire-doc-info';
-    const name=document.createElement('strong');name.textContent=f.name.replace(/^[0-9a-f-]{36}_/i,'');
-    const meta=document.createElement('small');meta.textContent=(f.metadata?.size?(f.metadata.size/1048576).toFixed(2)+' MB · ':'')+(f.created_at?new Date(f.created_at).toLocaleDateString('pt-BR'):'');
-    info.append(name,meta);
-    const actions=document.createElement('div');actions.className='sa-tire-doc-actions';
-    const open=document.createElement('button');open.type='button';open.textContent='↗ Abrir';
-    open.onclick=async()=>{
-     open.disabled=true;
-     try{const {data,error}=await supabaseClient.storage.from(saTireDocsBucket).createSignedUrl(path,120);if(error)throw error;window.open(data.signedUrl,'_blank','noopener,noreferrer')}
-     catch(e){alert('Erro ao abrir: '+(e?.message||e))}finally{open.disabled=false}
-    };
-    const del=document.createElement('button');del.type='button';del.textContent='Excluir';
-    del.onclick=async()=>{
-     if(!confirm('Excluir este arquivo permanentemente?'))return;
-     del.disabled=true;
-     try{const {data,error}=await supabaseClient.storage.from(saTireDocsBucket).remove([path]);if(error)throw error;if(!data?.length)throw Error('Exclusão não autorizada');await saTireDocsLoad(id)}
-     catch(e){alert('Exclusão permitida somente ao responsável pelo arquivo ou administrador. '+(e?.message||e));del.disabled=false}
-    };
-    actions.append(open,del);row.append(info,actions);holder.append(row);
-   }
-  }catch(e){saDocMsg('Falha ao carregar documentos: '+(e?.message||e))}
- };
- window.saTireDocsUpload=async function(ev){
-  const input=ev.target,files=Array.from(input.files||[]),id=$('sa-tire-detail-modal')?.dataset.id;
-  if(!id||!files.length||saDocsUploading)return;
-  saDocsUploading=true;input.disabled=true;let count=0;
-  try{
-   for(const file of files){
-    if(!/\.(pdf|xml|jpe?g|png|webp)$/i.test(file.name)){saDocMsg('Formato inválido: '+file.name);continue}
-    if(file.size>15728640){saDocMsg('Arquivo maior que 15 MB: '+file.name);continue}
-    const safe=file.name.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_.-]/g,'_').slice(-120);
-    const uid=crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2);
-    saDocMsg('Enviando '+file.name+'...');
-    const ext=file.name.split('.').pop().toLowerCase();
-    const mime={pdf:'application/pdf',xml:'application/xml',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp'}[ext];
-    const {error}=await supabaseClient.storage.from(saTireDocsBucket).upload(id+'/'+uid+'_'+safe,file,{upsert:false,contentType:mime});
-    if(error)throw Error(file.name+': '+error.message);count++;
-   }
-   await saTireDocsLoad(id);
-   if(count===files.length)saDocMsg(count+' arquivo(s) enviado(s) com sucesso');
-  }catch(e){saDocMsg('Erro no envio: '+(e?.message||e));if(count)await saTireDocsLoad(id)}
-  finally{saDocsUploading=false;input.disabled=false;input.value=''}
- };
  window.saTireCloseDetail=function(){$('sa-tire-detail-modal').classList.add('hidden')};
  window.saTireDelete=async function(id){
   if(!isAdmin())return alert('Somente o administrador pode arquivar remessas.');
@@ -6202,6 +6135,6 @@ window.addEventListener('message', async function(event){
  if(typeof oldOpen==='function')window.openRepairsModal=function(){oldOpen.apply(this,arguments);saTireSwitchTab('parts')};
 })();
 </script>
-<script src="./remessas-arquivos.js?v=20261117"></script>
+<script src="./remessas-arquivos.js?v=20261117-unificado"></script>
 </body></html>
 
