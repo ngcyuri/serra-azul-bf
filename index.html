@@ -5435,107 +5435,7 @@ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
 
     document.addEventListener("DOMContentLoaded", ()=>{ bindRequestMaterialLookup(); startApplication(); });
   </script>
-<script id="sa-tire-production-module">
-(function(){
- 'use strict';
 
- let records=[],busy=false,saving=false;
- const $=id=>document.getElementById(id);
- function escT(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
- function sums(r){return {total:r.items.reduce((a,x)=>a+Number(x.qty||0),0),returned:r.items.reduce((a,x)=>a+Number(x.returned||0),0)}}
- function getStatus(r){const x=sums(r);return x.returned===0?'Pendente':x.returned>=x.total?'Finalizada':'Parcial'}
- function fmt(d){if(!d)return '—';const q=String(d).slice(0,10).split('-');return q.length===3?q[2]+'/'+q[1]+'/'+q[0]:'—'}
- function byId(id){return records.find(x=>x.id===id)}
-
- function active(){return typeof supabaseClient!=='undefined'&&!!supabaseClient;}
- function isAdmin(){return typeof currentUserRole!=='undefined'&&currentUserRole==='admin';}
- function dateToday(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
- function syncStatus(msg,err=false){const e=$('sa-tire-sync-status');if(e){e.textContent=msg;e.style.color=err?'#ffc4bd':'#b4cfc0';}}
- async function fetchPages(table,fields){
-  const result=[];
-  for(let start=0;start<15000;start+=500){
-   const {data,error}=await supabaseClient.from(table).select(fields).order('created_at',{ascending:false}).range(start,start+499);
-   if(error)throw error;
-   result.push(...(data||[]));if(!data||data.length<500)return result;
-  }
-  throw new Error('Muitos registros. Solicite paginação ao administrador.');
- }
- window.saTireLoad=async function(){
-  if(busy)return;
-  if(!active())return syncStatus('Entre pela Central para acessar as remessas.',true);
-  busy=true;syncStatus('Sincronizando remessas de pneus...');
-  try{
-   const [ships,returns]=await Promise.all([
-    fetchPages('sa_tire_shipments','id,sent_date,supplier,patrimony,out_nf,responsible,notes,items,created_at'),
-    fetchPages('sa_tire_returns','id,shipment_id,item_index,qty,returned_on,return_nf,created_at')
-   ]);
-   const map=new Map();
-   for(const r of returns){const k=r.shipment_id+':'+r.item_index;if(!map.has(k))map.set(k,[]);map.get(k).push({qty:Number(r.qty),date:r.returned_on,nf:r.return_nf})}
-   records=ships.map(s=>({id:s.id,date:s.sent_date,supplier:s.supplier,patrimony:s.patrimony,nf:s.out_nf,owner:s.responsible,notes:s.notes,items:(Array.isArray(s.items)?s.items:[]).map((it,i)=>{
-     const history=map.get(s.id+':'+i)||[];return {...it,qty:Number(it.qty)||0,returned:history.reduce((a,x)=>a+x.qty,0),history};
-   })}));
-   saTireRender();syncStatus('Atualizado no Supabase às '+new Date().toLocaleTimeString('pt-BR'));
-  }catch(e){console.error('Pneus sincronização',e);syncStatus('Erro ao carregar pneus: '+(e?.message||e),true);}
-  finally{busy=false}
- };
-
- window.saTireSwitchTab=function(tab){const tires=tab==='tires';$('sa-repair-parts-area').hidden=tires;$('sa-tire-area').hidden=!tires;$('sa-repair-tab-parts').classList.toggle('active',!tires);$('sa-repair-tab-tires').classList.toggle('active',tires);$('sa-repair-tab-parts').setAttribute('aria-selected',String(!tires));$('sa-repair-tab-tires').setAttribute('aria-selected',String(tires));$('repairs-modal-title').textContent=tires?'◉ Controle de Pneus em Conserto':'🔧 Controle de Mercadorias em Conserto';if(tires){saTireRender();saTireLoad()}};
- window.saTireRender=function(){
-  const q=($('sa-tire-search')?.value||'').toLowerCase().trim();const status=$('sa-tire-status')?.value||'';
-  let total=0,returned=0;for(const r of records){const t=sums(r);total+=t.total;returned+=t.returned}
-  $('sa-tire-kpi-total').textContent=records.length;$('sa-tire-kpi-sent').textContent=total;$('sa-tire-kpi-pending').textContent=total-returned;$('sa-tire-kpi-returned').textContent=returned;
-  const rows=records.filter(r=>(!status||getStatus(r)===status)&&(!q||[r.nf,r.patrimony,r.supplier,r.owner,...r.items.flatMap(x=>[x.measure,x.brand,x.identification,x.defect])].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  $('sa-tire-empty').hidden=rows.length>0;
-  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireDelete('${r.id}')">Arquivar</button>`:""}</td></tr>`}).join('');
- };
- let editing=null;
- window.saTireOpenForm=function(){editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
- window.saTireCloseForm=function(){$('sa-tire-form-modal').classList.add('hidden')};
- window.saTireRefreshItemLabels=function(){const all=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')];all.forEach((card,i)=>{const label=card.querySelector('.sa-tire-item-number');if(label)label.textContent='PNEU '+String(i+1).padStart(2,'0')});const info=$('sa-tire-items-counter');if(info)info.textContent=all.length+' '+(all.length===1?'item cadastrado':'itens cadastrados')};
- window.saTireRemoveItem=function(button){const all=$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item');if(all.length<=1){alert('A remessa precisa ter pelo menos um pneu.');return;}button.closest('.sa-tire-form-item')?.remove();saTireRefreshItemLabels();};
- window.saTireAddItem=function(values={}){const div=document.createElement('div');div.className='sa-tire-form-item';div.innerHTML=`<div class="sa-tire-item-card-head"><div class="sa-tire-item-card-id"><span class="sa-tire-item-number">PNEU</span><strong>Detalhes do material</strong></div><button class="sa-tire-item-remove" type="button" onclick="saTireRemoveItem(this)" aria-label="Remover este pneu">✕ Remover</button></div><div class="sa-tire-item-fields"><label class="sa-tire-field-measure">Medida *<input class="ti-measure" required placeholder="Ex.: 18.4-30" value="${escT(values.measure||'')}"></label><label class="sa-tire-field-id">Identificação / Nº de fogo<input class="ti-id" placeholder="Ex.: PNEU-058" value="${escT(values.identification||'')}"></label><label class="sa-tire-field-brand">Marca<input class="ti-brand" placeholder="Marca do pneu" value="${escT(values.brand||'')}"></label><label class="sa-tire-field-qty">Quantidade *<input class="ti-qty" type="number" min="1" step="1" required value="${values.qty||1}"></label><label class="sa-tire-field-defect">Motivo / serviço solicitado<input class="ti-defect" placeholder="Ex.: recapagem, furo lateral, vulcanização" value="${escT(values.defect||'')}"></label></div>`;$('sa-tire-form-items').appendChild(div);saTireRefreshItemLabels()};
- window.saTireSave=async function(e){
-  e.preventDefault();if(saving||!active())return;
-  const items=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')].map(d=>({
-   measure:d.querySelector('.ti-measure').value.trim(),brand:d.querySelector('.ti-brand').value.trim(),
-   identification:d.querySelector('.ti-id').value.trim(),defect:d.querySelector('.ti-defect').value.trim(),
-   qty:Number(d.querySelector('.ti-qty').value)}));
-  if(!items.length||items.some(x=>!x.measure||!Number.isInteger(x.qty)||x.qty<=0))return alert('Informe ao menos um pneu com medida e quantidade inteira.');
-  const args={p_sent_date:$('sa-tire-date').value,p_supplier:$('sa-tire-supplier').value.trim(),p_patrimony:$('sa-tire-patrimony').value.trim(),p_out_nf:$('sa-tire-nf').value.trim(),p_responsible:$('sa-tire-owner').value.trim(),p_notes:$('sa-tire-notes').value.trim(),p_items:items};
-  if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible)return alert('Preencha os campos obrigatórios.');
-  saving=true;const btn=$('sa-tire-form').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Salvando...';
-  try{const {error}=await supabaseClient.rpc('sa_tire_create_shipment',args);if(error)throw error;saTireCloseForm();await saTireLoad();alert('Remessa de pneus salva no Supabase.');}
-  catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
-  finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
- };
- window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join('');$('sa-tire-detail-content').innerHTML=html;$('sa-tire-detail-modal').classList.remove('hidden')};
- window.saTireReturn=async function(index){
-  if(saving||!active())return;
-  const r=byId($('sa-tire-detail-modal').dataset.id),x=r?.items[index];if(!x)return;
-  const qty=Number($('sa-tr-qty-'+index).value),date=$('sa-tr-date-'+index).value,nf=$('sa-tr-nf-'+index).value.trim();
-  if(!Number.isInteger(qty)||qty<=0||qty>x.qty-x.returned)return alert('Quantidade de retorno inválida.');
-  if(!date||date<r.date)return alert('Data de retorno inválida.');
-  if(!confirm('Registrar retorno de '+qty+' pneu(s)?'))return;
-  saving=true;
-  try{const {error}=await supabaseClient.rpc('sa_tire_record_return',{p_shipment_id:r.id,p_item_index:index,p_quantity:qty,p_return_date:date,p_return_nf:nf});if(error)throw error;await saTireLoad();saTireDetail(r.id);}
-  catch(err){console.error('Pneus retorno',err);alert('Falha ao registrar retorno: '+(err?.message||err))}
-  finally{saving=false}
- };
- window.saTireCloseDetail=function(){$('sa-tire-detail-modal').classList.add('hidden')};
- window.saTireDelete=async function(id){
-  if(!isAdmin())return alert('Somente o administrador pode arquivar remessas.');
-  const r=byId(id);if(!r)return;
-  const motivo=prompt('Justificativa para arquivar a NF '+r.nf+' (mínimo de 8 caracteres):');
-  if(motivo===null)return;if(motivo.trim().length<8)return alert('Informe a justificativa.');
-  if(!confirm('Confirmar arquivamento? O histórico será preservado.'))return;
-  const {error}=await supabaseClient.rpc('sa_tire_archive_shipment',{p_shipment_id:id,p_reason:motivo.trim()});
-  if(error)return alert('Não foi possível arquivar: '+error.message);
-  await saTireLoad();
- };
- const oldOpen=window.openRepairsModal;
- if(typeof oldOpen==='function')window.openRepairsModal=function(){oldOpen.apply(this,arguments);saTireSwitchTab('parts')};
-})();
-</script>
 
  
 <!-- Empresas e Filiais — consulta somente do site -->
@@ -6130,6 +6030,107 @@ window.addEventListener('message', async function(event){
     f.contentWindow.postMessage({type:'sa-alm-auth-session',access_token:session?.access_token||'',refresh_token:session?.refresh_token||''},event.origin);
   } catch(err){console.warn('Sessão Almoxarifado',err);}
 });
+</script>
+<script id="sa-tire-production-module">
+(function(){
+ 'use strict';
+
+ let records=[],busy=false,saving=false;
+ const $=id=>document.getElementById(id);
+ function escT(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
+ function sums(r){return {total:r.items.reduce((a,x)=>a+Number(x.qty||0),0),returned:r.items.reduce((a,x)=>a+Number(x.returned||0),0)}}
+ function getStatus(r){const x=sums(r);return x.returned===0?'Pendente':x.returned>=x.total?'Finalizada':'Parcial'}
+ function fmt(d){if(!d)return '—';const q=String(d).slice(0,10).split('-');return q.length===3?q[2]+'/'+q[1]+'/'+q[0]:'—'}
+ function byId(id){return records.find(x=>x.id===id)}
+
+ function active(){return typeof supabaseClient!=='undefined'&&!!supabaseClient;}
+ function isAdmin(){return typeof currentUserRole!=='undefined'&&currentUserRole==='admin';}
+ function dateToday(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+ function syncStatus(msg,err=false){const e=$('sa-tire-sync-status');if(e){e.textContent=msg;e.style.color=err?'#ffc4bd':'#b4cfc0';}}
+ async function fetchPages(table,fields){
+  const result=[];
+  for(let start=0;start<15000;start+=500){
+   const {data,error}=await supabaseClient.from(table).select(fields).order('created_at',{ascending:false}).range(start,start+499);
+   if(error)throw error;
+   result.push(...(data||[]));if(!data||data.length<500)return result;
+  }
+  throw new Error('Muitos registros. Solicite paginação ao administrador.');
+ }
+ window.saTireLoad=async function(){
+  if(busy)return;
+  if(!active())return syncStatus('Entre pela Central para acessar as remessas.',true);
+  busy=true;syncStatus('Sincronizando remessas de pneus...');
+  try{
+   const [ships,returns]=await Promise.all([
+    fetchPages('sa_tire_shipments','id,sent_date,supplier,patrimony,out_nf,responsible,notes,items,created_at'),
+    fetchPages('sa_tire_returns','id,shipment_id,item_index,qty,returned_on,return_nf,created_at')
+   ]);
+   const map=new Map();
+   for(const r of returns){const k=r.shipment_id+':'+r.item_index;if(!map.has(k))map.set(k,[]);map.get(k).push({qty:Number(r.qty),date:r.returned_on,nf:r.return_nf})}
+   records=ships.map(s=>({id:s.id,date:s.sent_date,supplier:s.supplier,patrimony:s.patrimony,nf:s.out_nf,owner:s.responsible,notes:s.notes,items:(Array.isArray(s.items)?s.items:[]).map((it,i)=>{
+     const history=map.get(s.id+':'+i)||[];return {...it,qty:Number(it.qty)||0,returned:history.reduce((a,x)=>a+x.qty,0),history};
+   })}));
+   saTireRender();syncStatus('Atualizado no Supabase às '+new Date().toLocaleTimeString('pt-BR'));
+  }catch(e){console.error('Pneus sincronização',e);syncStatus('Erro ao carregar pneus: '+(e?.message||e),true);}
+  finally{busy=false}
+ };
+
+ window.saTireSwitchTab=function(tab){const tires=tab==='tires';$('sa-repair-parts-area').hidden=tires;$('sa-tire-area').hidden=!tires;$('sa-repair-tab-parts').classList.toggle('active',!tires);$('sa-repair-tab-tires').classList.toggle('active',tires);$('sa-repair-tab-parts').setAttribute('aria-selected',String(!tires));$('sa-repair-tab-tires').setAttribute('aria-selected',String(tires));$('repairs-modal-title').textContent=tires?'◉ Controle de Pneus em Conserto':'🔧 Controle de Mercadorias em Conserto';if(tires){saTireRender();saTireLoad()}};
+ window.saTireRender=function(){
+  const q=($('sa-tire-search')?.value||'').toLowerCase().trim();const status=$('sa-tire-status')?.value||'';
+  let total=0,returned=0;for(const r of records){const t=sums(r);total+=t.total;returned+=t.returned}
+  $('sa-tire-kpi-total').textContent=records.length;$('sa-tire-kpi-sent').textContent=total;$('sa-tire-kpi-pending').textContent=total-returned;$('sa-tire-kpi-returned').textContent=returned;
+  const rows=records.filter(r=>(!status||getStatus(r)===status)&&(!q||[r.nf,r.patrimony,r.supplier,r.owner,...r.items.flatMap(x=>[x.measure,x.brand,x.identification,x.defect])].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  $('sa-tire-empty').hidden=rows.length>0;
+  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireDelete('${r.id}')">Arquivar</button>`:""}</td></tr>`}).join('');
+ };
+ let editing=null;
+ window.saTireOpenForm=function(){editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
+ window.saTireCloseForm=function(){$('sa-tire-form-modal').classList.add('hidden')};
+ window.saTireRefreshItemLabels=function(){const all=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')];all.forEach((card,i)=>{const label=card.querySelector('.sa-tire-item-number');if(label)label.textContent='PNEU '+String(i+1).padStart(2,'0')});const info=$('sa-tire-items-counter');if(info)info.textContent=all.length+' '+(all.length===1?'item cadastrado':'itens cadastrados')};
+ window.saTireRemoveItem=function(button){const all=$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item');if(all.length<=1){alert('A remessa precisa ter pelo menos um pneu.');return;}button.closest('.sa-tire-form-item')?.remove();saTireRefreshItemLabels();};
+ window.saTireAddItem=function(values={}){const div=document.createElement('div');div.className='sa-tire-form-item';div.innerHTML=`<div class="sa-tire-item-card-head"><div class="sa-tire-item-card-id"><span class="sa-tire-item-number">PNEU</span><strong>Detalhes do material</strong></div><button class="sa-tire-item-remove" type="button" onclick="saTireRemoveItem(this)" aria-label="Remover este pneu">✕ Remover</button></div><div class="sa-tire-item-fields"><label class="sa-tire-field-measure">Medida *<input class="ti-measure" required placeholder="Ex.: 18.4-30" value="${escT(values.measure||'')}"></label><label class="sa-tire-field-id">Identificação / Nº de fogo<input class="ti-id" placeholder="Ex.: PNEU-058" value="${escT(values.identification||'')}"></label><label class="sa-tire-field-brand">Marca<input class="ti-brand" placeholder="Marca do pneu" value="${escT(values.brand||'')}"></label><label class="sa-tire-field-qty">Quantidade *<input class="ti-qty" type="number" min="1" step="1" required value="${values.qty||1}"></label><label class="sa-tire-field-defect">Motivo / serviço solicitado<input class="ti-defect" placeholder="Ex.: recapagem, furo lateral, vulcanização" value="${escT(values.defect||'')}"></label></div>`;$('sa-tire-form-items').appendChild(div);saTireRefreshItemLabels()};
+ window.saTireSave=async function(e){
+  e.preventDefault();if(saving||!active())return;
+  const items=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')].map(d=>({
+   measure:d.querySelector('.ti-measure').value.trim(),brand:d.querySelector('.ti-brand').value.trim(),
+   identification:d.querySelector('.ti-id').value.trim(),defect:d.querySelector('.ti-defect').value.trim(),
+   qty:Number(d.querySelector('.ti-qty').value)}));
+  if(!items.length||items.some(x=>!x.measure||!Number.isInteger(x.qty)||x.qty<=0))return alert('Informe ao menos um pneu com medida e quantidade inteira.');
+  const args={p_sent_date:$('sa-tire-date').value,p_supplier:$('sa-tire-supplier').value.trim(),p_patrimony:$('sa-tire-patrimony').value.trim(),p_out_nf:$('sa-tire-nf').value.trim(),p_responsible:$('sa-tire-owner').value.trim(),p_notes:$('sa-tire-notes').value.trim(),p_items:items};
+  if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible)return alert('Preencha os campos obrigatórios.');
+  saving=true;const btn=$('sa-tire-form').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Salvando...';
+  try{const {error}=await supabaseClient.rpc('sa_tire_create_shipment',args);if(error)throw error;saTireCloseForm();await saTireLoad();alert('Remessa de pneus salva no Supabase.');}
+  catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
+  finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
+ };
+ window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join('');$('sa-tire-detail-content').innerHTML=html;$('sa-tire-detail-modal').classList.remove('hidden')};
+ window.saTireReturn=async function(index){
+  if(saving||!active())return;
+  const r=byId($('sa-tire-detail-modal').dataset.id),x=r?.items[index];if(!x)return;
+  const qty=Number($('sa-tr-qty-'+index).value),date=$('sa-tr-date-'+index).value,nf=$('sa-tr-nf-'+index).value.trim();
+  if(!Number.isInteger(qty)||qty<=0||qty>x.qty-x.returned)return alert('Quantidade de retorno inválida.');
+  if(!date||date<r.date)return alert('Data de retorno inválida.');
+  if(!confirm('Registrar retorno de '+qty+' pneu(s)?'))return;
+  saving=true;
+  try{const {error}=await supabaseClient.rpc('sa_tire_record_return',{p_shipment_id:r.id,p_item_index:index,p_quantity:qty,p_return_date:date,p_return_nf:nf});if(error)throw error;await saTireLoad();saTireDetail(r.id);}
+  catch(err){console.error('Pneus retorno',err);alert('Falha ao registrar retorno: '+(err?.message||err))}
+  finally{saving=false}
+ };
+ window.saTireCloseDetail=function(){$('sa-tire-detail-modal').classList.add('hidden')};
+ window.saTireDelete=async function(id){
+  if(!isAdmin())return alert('Somente o administrador pode arquivar remessas.');
+  const r=byId(id);if(!r)return;
+  const motivo=prompt('Justificativa para arquivar a NF '+r.nf+' (mínimo de 8 caracteres):');
+  if(motivo===null)return;if(motivo.trim().length<8)return alert('Informe a justificativa.');
+  if(!confirm('Confirmar arquivamento? O histórico será preservado.'))return;
+  const {error}=await supabaseClient.rpc('sa_tire_archive_shipment',{p_shipment_id:id,p_reason:motivo.trim()});
+  if(error)return alert('Não foi possível arquivar: '+error.message);
+  await saTireLoad();
+ };
+ const oldOpen=window.openRepairsModal;
+ if(typeof oldOpen==='function')window.openRepairsModal=function(){oldOpen.apply(this,arguments);saTireSwitchTab('parts')};
+})();
 </script>
 </body></html>
 
