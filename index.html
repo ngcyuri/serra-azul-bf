@@ -2366,6 +2366,25 @@ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
 #sa-tire-quick-hint{border-radius:12px;padding:12px;background:rgba(50,137,91,.13);border:1px solid rgba(144,224,171,.2);color:#c4efda!important}
 #sa-tire-items-section[hidden],#sa-tire-quick-hint[hidden]{display:none!important}
 </style>
+<style id="sa-tire-save-feedback-glass">
+#sa-tire-save-feedback[hidden]{display:none!important}
+.sa-tire-save-feedback{display:flex;align-items:center;gap:14px;margin:12px 22px 4px;padding:14px 17px;border-radius:15px;border:1px solid rgba(171,233,198,.23);background:linear-gradient(110deg,rgba(26,77,54,.74),rgba(27,48,46,.76));box-shadow:0 12px 32px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.07);backdrop-filter:blur(18px);color:#eaffef;animation:sa-tire-feedback-in .25s ease-out}
+.sa-tire-save-feedback.is-error{border-color:rgba(253,149,149,.32);background:linear-gradient(110deg,rgba(102,39,48,.75),rgba(53,36,43,.76));color:#ffe3df}
+.sa-tire-save-feedback.is-loading{border-color:rgba(177,214,229,.25);background:linear-gradient(110deg,rgba(35,67,72,.76),rgba(30,45,56,.78))}
+.sa-tire-feedback-icon{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:11px;background:rgba(115,231,156,.16);color:#b2ffce;font-weight:800;font-size:21px}
+.sa-tire-save-feedback.is-error .sa-tire-feedback-icon{background:rgba(255,146,146,.14);color:#ffc4bc}
+.sa-tire-save-feedback.is-loading .sa-tire-feedback-icon{width:26px;height:26px;border:3px solid rgba(184,224,233,.2);border-top-color:#b4f5ed;border-radius:50%;background:transparent;animation:sa-tire-spin .8s linear infinite}
+.sa-tire-feedback-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sa-tire-feedback-text strong{font-size:13px;font-weight:750;color:inherit}
+.sa-tire-feedback-text span{font-size:12px;line-height:1.45;color:inherit;opacity:.86;overflow-wrap:anywhere}
+#sa-tire-save-button{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-width:155px}
+.sa-tire-save-spinner{display:none;flex:none;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sa-tire-spin .8s linear infinite}
+#sa-tire-save-button.is-saving .sa-tire-save-spinner{display:inline-block}
+#sa-tire-save-button.is-saving{opacity:.8;cursor:wait}
+@keyframes sa-tire-spin{to{transform:rotate(360deg)}}@keyframes sa-tire-feedback-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.sa-tire-save-feedback{margin:10px 14px 4px}}
+@media(prefers-reduced-motion:reduce){.sa-tire-save-feedback,.sa-tire-save-spinner,.sa-tire-save-feedback.is-loading .sa-tire-feedback-icon{animation:none}}
+</style>
 </head>
  <body data-template-id="__page-root" class="w-full full-vh bg-slate-50" style="background: rgb(241, 245, 249);">
 <script>window.__saApplyBodyTheme&&window.__saApplyBodyTheme();</script>
@@ -2889,7 +2908,11 @@ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
       <div id="sa-tire-form-items"></div>
 <p class="sa-tire-hint"><span aria-hidden="true">ⓘ</span> O retorno pode ser parcial por item. Cada pneu ou lote terá seu próprio histórico.</p></div><p id="sa-tire-quick-hint" hidden class="sa-tire-hint">⚡ Registro rápido: salve apenas as informações da remessa, sem cadastrar os pneus agora. Você poderá anexar documentos e, como administrador, adicionar os pneus depois pelo botão Editar.</p>
       </div>
-      <div class="sa-tire-modal-foot"><span class="sa-tire-foot-info">● Dados das remessas salvos no Supabase</span><button type="button" class="sa-tire-outline" onclick="saTireCloseForm()">Cancelar</button><button type="submit" class="sa-tire-primary">Salvar remessa</button></div>
+      <div id="sa-tire-save-feedback" class="sa-tire-save-feedback" hidden role="status" aria-live="polite">
+ <span id="sa-tire-feedback-icon" class="sa-tire-feedback-icon" aria-hidden="true">✓</span>
+ <div class="sa-tire-feedback-text"><strong id="sa-tire-feedback-title"></strong><span id="sa-tire-feedback-detail"></span></div>
+</div>
+<div class="sa-tire-modal-foot"><span class="sa-tire-foot-info">● Dados das remessas salvos no Supabase</span><button type="button" class="sa-tire-outline" onclick="saTireCloseForm()">Cancelar</button><button id="sa-tire-save-button" type="submit" class="sa-tire-primary"><span class="sa-tire-save-spinner" aria-hidden="true"></span><span class="sa-tire-save-label">Salvar remessa</span></button></div>
     </form>
   </div>
 </div>
@@ -6094,10 +6117,11 @@ window.addEventListener('message', async function(event){
   $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireEdit('${r.id}')">✎ Editar</button><button type="button" onclick="saTireDelete('${r.id}')">Excluir</button>`:""}</td></tr>`}).join('');
  };
  let editing=null;
- window.saTireOpenForm=function(){editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireSetMode(false);saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
+ window.saTireOpenForm=function(){saTireFeedbackReset();editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireSetMode(false);saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
  window.saTireEdit=function(id){
   if(!isAdmin())return alert('Somente o administrador pode editar remessas.');
   const r=byId(id);if(!r)return alert('Remessa não encontrada. Atualize a lista.');
+  saTireFeedbackReset();
   editing=id;
   $('sa-tire-form').reset();
   $('sa-tire-form-items').replaceChildren();
@@ -6129,32 +6153,70 @@ window.addEventListener('message', async function(event){
   if(choice)choice.checked=true;
   if(section)section.querySelectorAll('input').forEach(el=>el.disabled=!!quick);
  };
- window.saTireCloseForm=function(){$('sa-tire-form-modal').classList.add('hidden')};
+ window.saTireCloseForm=function(){if(saving)return;saTireFeedbackReset();$('sa-tire-form-modal').classList.add('hidden')};
  window.saTireRefreshItemLabels=function(){const all=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')];all.forEach((card,i)=>{const label=card.querySelector('.sa-tire-item-number');if(label)label.textContent='PNEU '+String(i+1).padStart(2,'0')});const info=$('sa-tire-items-counter');if(info)info.textContent=all.length+' '+(all.length===1?'item cadastrado':'itens cadastrados')};
  window.saTireRemoveItem=function(button){const all=$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item');if(all.length<=1){alert('A remessa precisa ter pelo menos um pneu.');return;}button.closest('.sa-tire-form-item')?.remove();saTireRefreshItemLabels();};
  window.saTireAddItem=function(values={}){const div=document.createElement('div');div.className='sa-tire-form-item';div.innerHTML=`<div class="sa-tire-item-card-head"><div class="sa-tire-item-card-id"><span class="sa-tire-item-number">PNEU</span><strong>Detalhes do material</strong></div><button class="sa-tire-item-remove" type="button" onclick="saTireRemoveItem(this)" aria-label="Remover este pneu">✕ Remover</button></div><div class="sa-tire-item-fields"><label class="sa-tire-field-measure">Medida *<input class="ti-measure" required placeholder="Ex.: 18.4-30" value="${escT(values.measure||'')}"></label><label class="sa-tire-field-id">Identificação / Nº de fogo<input class="ti-id" placeholder="Ex.: PNEU-058" value="${escT(values.identification||'')}"></label><label class="sa-tire-field-brand">Marca<input class="ti-brand" placeholder="Marca do pneu" value="${escT(values.brand||'')}"></label><label class="sa-tire-field-qty">Quantidade *<input class="ti-qty" type="number" min="1" step="1" required value="${values.qty||1}"></label><label class="sa-tire-field-defect">Motivo / serviço solicitado<input class="ti-defect" placeholder="Ex.: recapagem, furo lateral, vulcanização" value="${escT(values.defect||'')}"></label></div>`;$('sa-tire-form-items').appendChild(div);saTireRefreshItemLabels()};
+ let saTireFeedbackTimer=null;
+ function saTireFeedback(kind,title,detail){
+  const el=$('sa-tire-save-feedback');
+  if(!el)return;
+  el.hidden=false;el.className='sa-tire-save-feedback is-'+kind;
+  $('sa-tire-feedback-icon').textContent=kind==='success'?'✓':kind==='error'?'!':'';
+  $('sa-tire-feedback-title').textContent=title;
+  $('sa-tire-feedback-detail').textContent=detail||'';
+ }
+ function saTireFeedbackReset(){
+  if(saTireFeedbackTimer){clearTimeout(saTireFeedbackTimer);saTireFeedbackTimer=null;}
+  const el=$('sa-tire-save-feedback');if(el){el.hidden=true;el.className='sa-tire-save-feedback';}
+ }
+ function saTireSaveBusy(value){
+  const btn=$('sa-tire-save-button');if(!btn)return;
+  btn.disabled=value;btn.classList.toggle('is-saving',value);
+  const label=btn.querySelector('.sa-tire-save-label');
+  if(label)label.textContent=value?'Salvando remessa...':'Salvar remessa';
+ }
  window.saTireSave=async function(e){
-  e.preventDefault();if(saving||!active())return;
+  if(e)e.preventDefault();
+  if(saving)return;
+  saTireFeedbackReset();
+  if(!active()){saTireFeedback('error','Conexão indisponível','Verifique a conexão com o Supabase e tente novamente.');return;}
   const quick=document.querySelector('input[name="sa-tire-mode"]:checked')?.value==='quick';
   const items=quick?[]:[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')].map(d=>({
    measure:d.querySelector('.ti-measure').value.trim(),brand:d.querySelector('.ti-brand').value.trim(),
    identification:d.querySelector('.ti-id').value.trim(),defect:d.querySelector('.ti-defect').value.trim(),
    qty:Number(d.querySelector('.ti-qty').value)}));
-  if(!quick&&(!items.length||items.some(x=>!x.measure||!Number.isInteger(x.qty)||x.qty<=0)))return alert('Informe ao menos um pneu com medida e quantidade inteira, ou selecione Registro rápido.');
+  if(!quick&&(!items.length||items.some(x=>!x.measure||!Number.isInteger(x.qty)||x.qty<=0))){
+   saTireFeedback('error','Confira os pneus','Informe medida e quantidade de cada pneu ou selecione Registro rápido.');
+   return;
+  }
   const args={p_sent_date:$('sa-tire-date').value,p_supplier:$('sa-tire-supplier').value.trim(),p_patrimony:$('sa-tire-patrimony').value.trim(),p_out_nf:$('sa-tire-nf').value.trim(),p_responsible:$('sa-tire-owner').value.trim(),p_notes:$('sa-tire-notes').value.trim(),p_items:items};
-  if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible)return alert('Preencha os campos obrigatórios.');
-  saving=true;const btn=$('sa-tire-form').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Salvando...';
+  if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible){
+   saTireFeedback('error','Campos obrigatórios','Preencha data, fornecedor, patrimônio, NF e responsável.');
+   return;
+  }
+  saving=true;saTireSaveBusy(true);
+  saTireFeedback('loading','Salvando remessa','Enviando as informações com segurança ao Supabase...');
   try{
    const isEdit=!!editing;
-   const operation=isEdit?'sa_tire_update_shipment':'sa_tire_create_shipment';
-   const request=isEdit?{...args,p_shipment_id:editing}:args;
-   const {error}=await supabaseClient.rpc(operation,request);
+   const {error}=await supabaseClient.rpc(isEdit?'sa_tire_update_shipment':'sa_tire_create_shipment',
+    isEdit?{...args,p_shipment_id:editing}:args);
    if(error)throw error;
-   editing=null;saTireCloseForm();await saTireLoad();
-   alert(isEdit?'Remessa atualizada com sucesso.':'Remessa de pneus salva no Supabase.');
+   editing=null;
+   saTireFeedback('success',isEdit?'Remessa atualizada!':'Remessa salva com sucesso!',
+    'O registro foi confirmado no Supabase.');
+   try{await saTireLoad()}catch(refreshError){console.warn('Atualização da lista após salvar:',refreshError)}
+   saTireFeedbackTimer=setTimeout(()=>{
+    saTireFeedbackTimer=null;
+    $('sa-tire-form-modal')?.classList.add('hidden');
+    saTireFeedbackReset();
+   },1500);
+  }catch(err){
+   console.error('Pneus cadastro',err);
+   saTireFeedback('error','Não foi possível salvar',String(err?.message||err||'Verifique os dados e tente novamente.'));
+  }finally{
+   saving=false;saTireSaveBusy(false);
   }
-  catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
-  finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
  };
  window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=(r.items.length? r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join(''):'<div class="sa-tire-detail-box"><h3>⚡ Registro rápido</h3><p>Esta remessa foi salva sem detalhes dos pneus. Você pode adicionar documentos normalmente e, se necessário, incluir pneus pela opção Editar.</p></div>');$('sa-tire-detail-content').innerHTML=html;$('sa-tire-detail-modal').classList.remove('hidden')};
  window.saTireReturn=async function(index){
