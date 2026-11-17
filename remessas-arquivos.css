@@ -1,0 +1,37 @@
+
+/* Arquivos das Remessas • Liquid Glass integrado ao módulo Consertos de Pneus */
+.sa-tire-files-panel{margin:20px 0 8px;padding:20px;border-radius:20px;background:linear-gradient(135deg,rgba(26,52,42,.64),rgba(12,26,23,.77));border:1px solid rgba(195,246,217,.17);box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(20px) saturate(135%);-webkit-backdrop-filter:blur(20px) saturate(135%);color:#eaf9ef;font-family:inherit}
+.sa-tire-files-panel *{box-sizing:border-box}
+.sa-tire-files-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.sa-tire-files-title{display:flex;align-items:center;gap:12px}
+.sa-tire-files-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:14px;font-size:21px;background:rgba(120,206,153,.13);border:1px solid rgba(191,246,205,.18)}
+.sa-tire-files-head h3{margin:0;color:#f1fff6;font-size:17px;line-height:1.2;font-weight:780}
+.sa-tire-files-sub{margin:5px 0 0;color:#b6cfc0;font-size:12px}
+.sa-tire-files-count{display:inline-flex;align-items:center;border:1px solid rgba(195,246,217,.2);border-radius:999px;padding:6px 12px;color:#c9edda;background:rgba(255,255,255,.05);font-size:12px}
+.sa-tire-files-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:146px;padding:20px;border:1.5px dashed rgba(164,218,183,.35);border-radius:16px;background:rgba(255,255,255,.035);text-align:center;transition:background .2s,border-color .2s}
+.sa-tire-files-drop.is-over{background:rgba(79,169,110,.16);border-color:#8de1a3}
+.sa-tire-files-drop strong{font-size:13px;color:#e7f8ee;font-weight:710}
+.sa-tire-files-drop small{font-size:11px;color:#a8c5b3}
+.sa-tire-files-button{background:linear-gradient(145deg,#c5f4d2,#88dcaa)!important;color:#163726!important;border:1px solid #c5f4d2!important;border-radius:10px!important;padding:10px 15px!important;font-size:12px!important;font-weight:800!important;cursor:pointer!important;min-height:38px}
+.sa-tire-files-button:disabled{opacity:.45;cursor:wait!important}
+.sa-tire-files-list{display:flex;flex-direction:column;gap:8px;margin-top:15px}
+.sa-tire-file-row{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid rgba(195,246,217,.14);background:rgba(255,255,255,.045);border-radius:13px;min-width:0}
+.sa-tire-file-glyph{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:10px;background:rgba(120,200,154,.12);font-size:20px}
+.sa-tire-file-meta{min-width:0;flex:1}
+.sa-tire-file-name{display:block;font-size:12px;font-weight:760;overflow-wrap:anywhere;color:#f2fff7}
+.sa-tire-file-extra{display:block;margin-top:4px;font-size:11px;color:#b1cdbd}
+.sa-tire-file-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.sa-tire-file-action{padding:8px 10px!important;min-height:33px;border-radius:9px!important;background:rgba(220,250,231,.06)!important;color:#d5f7e3!important;border:1px solid rgba(220,250,231,.22)!important;font-size:12px!important;font-weight:670!important;cursor:pointer!important}
+.sa-tire-file-action.danger{color:#ffc4c4!important;border-color:rgba(255,140,140,.24)!important}
+.sa-tire-file-action:disabled{opacity:.5;cursor:wait!important}
+.sa-tire-files-feedback{min-height:17px;margin-top:12px;font-size:12px;color:#bad8c6}
+.sa-tire-files-feedback.is-error{color:#ffc5bc}
+.sa-tire-files-feedback.is-success{color:#a7f4b7}
+.sa-tire-files-empty{padding:18px 10px;text-align:center;color:#a8c4b2;font-size:12px;border:1px solid rgba(195,246,217,.1);border-radius:11px}
+html:not(.sa-dark) .sa-tire-files-panel,body:not(.sa-dark) .sa-tire-files-panel{background:linear-gradient(140deg,rgba(245,252,247,.95),rgba(224,242,231,.91));border-color:rgba(57,115,77,.22);color:#173e28}
+html:not(.sa-dark) .sa-tire-files-panel h3,html:not(.sa-dark) .sa-tire-files-drop strong,html:not(.sa-dark) .sa-tire-file-name{color:#17442e}
+html:not(.sa-dark) .sa-tire-files-sub,html:not(.sa-dark) .sa-tire-files-drop small,html:not(.sa-dark) .sa-tire-file-extra,html:not(.sa-dark) .sa-tire-files-empty{color:#587866}
+html:not(.sa-dark) .sa-tire-file-row,html:not(.sa-dark) .sa-tire-files-drop{border-color:rgba(57,115,77,.22);background:rgba(255,255,255,.5)}
+html:not(.sa-dark) .sa-tire-file-action{color:#24533b!important;border-color:rgba(57,115,77,.3)!important;background:rgba(255,255,255,.55)!important}
+html:not(.sa-dark) .sa-tire-files-count{color:#305b40;border-color:#adcdb5}
+@media(max-width:640px){.sa-tire-files-panel{padding:14px;border-radius:15px}.sa-tire-file-row{flex-wrap:wrap}.sa-tire-file-actions{width:100%;padding-left:49px}.sa-tire-file-action{flex:1}}
