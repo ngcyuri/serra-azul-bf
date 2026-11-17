@@ -1812,6 +1812,551 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
 .sa-almox-primary:hover{transform:translateY(-1px)}
 @media(prefers-reduced-motion:reduce){#sa-almox-module.sa-almox-open{animation:none!important}.sa-almox-primary{transition:none!important}}
 </style>
+<style id="sa-tires-test2-theme">
+/* BETA 5 — somente novos componentes, preserva as classes e o visual dos consertos originais */
+.sa-tire-tabs{display:flex;gap:9px;border-bottom:1px solid rgba(116,158,137,.25);padding-bottom:12px;margin:0 0 17px;flex-wrap:wrap}
+.sa-tire-tabs button{border:1px solid rgba(127,162,144,.25);border-radius:11px;padding:11px 16px;color:#b8cec3;background:rgba(16,31,26,.8);font-size:13px;font-weight:750;cursor:pointer}
+.sa-tire-tabs button.active{color:#effff4;background:linear-gradient(120deg,rgba(36,116,81,.57),rgba(26,60,52,.7));border-color:#419a70;box-shadow:inset 0 -2px #50c88b}
+.sa-tire-testbadge{font-size:9px;font-weight:800;letter-spacing:.08em;color:#b5f0cf;margin-left:7px}
+#sa-tire-area[hidden],#sa-repair-parts-area[hidden]{display:none!important}
+.sa-tire-notice{color:#e0e4cb;background:#3b3421;border:1px solid #77653d;padding:12px 14px;border-radius:10px;margin:0 0 17px;font-size:12px;line-height:1.5}
+.sa-tire-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:17px}
+.sa-tire-kpi{background:linear-gradient(145deg,rgba(28,49,39,.85),rgba(21,39,31,.9));border:1px solid #385746;padding:15px 16px;border-radius:13px;color:#fff}
+.sa-tire-kpi span{font-size:10px;font-weight:800;letter-spacing:.08em;color:#9cbcab;display:block;margin-bottom:8px}.sa-tire-kpi strong{font-size:26px;line-height:1;font-weight:850}
+.sa-tire-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 15px}
+.sa-tire-toolbar input{flex:2 1 260px}.sa-tire-toolbar select{flex:1 1 145px}.sa-tire-toolbar input,.sa-tire-toolbar select,.sa-tire-form-panel input,.sa-tire-form-panel select,.sa-tire-form-panel textarea{background:rgba(17,37,29,.88)!important;color:#f1fcf5!important;border:1px solid #416652!important;padding:11px 12px;border-radius:9px;min-width:0;width:100%;outline:none}
+.sa-tire-toolbar input:focus,.sa-tire-form-panel input:focus,.sa-tire-form-panel select:focus{border-color:#58d297!important;box-shadow:0 0 0 2px #58d29726}
+.sa-tire-primary{border:1px solid #3cbe83;background:linear-gradient(120deg,#269965,#21875a);color:#fff;padding:11px 15px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer}
+.sa-tire-primary:hover{filter:brightness(1.1)}.sa-tire-outline{border:1px solid #517460;color:#e6fff1;background:#1d3529;padding:10px 13px;border-radius:10px;font-weight:700;cursor:pointer}
+.sa-tire-tablewrap{overflow:auto;border:1px solid #375846;border-radius:12px;max-height:45vh}
+.sa-tire-tablewrap table{width:100%;min-width:960px;border-collapse:collapse}.sa-tire-tablewrap th{background:#14281e!important;color:#afc8ba!important;font-size:11px;padding:13px 12px;text-align:left}.sa-tire-tablewrap td{background:#14251d!important;color:#e7f4eb!important;border-top:1px solid #345342!important;padding:12px;font-size:12px;white-space:nowrap}
+.sa-tire-tablewrap button{background:rgba(55,108,79,.25);border:1px solid #3b6c50;color:#c8f0d9;border-radius:8px;padding:7px 10px;margin-right:4px;cursor:pointer}
+.sa-tire-pill{display:inline-block;padding:5px 9px;border-radius:99px;background:#33452c;color:#f2d4a1;font-size:11px;font-weight:800}.sa-tire-pill.done{background:#1c4a32;color:#a2ebbd}
+.sa-tire-empty{text-align:center;padding:22px;color:#afc4b6;font-size:13px}.sa-tire-empty[hidden]{display:none}
+#sa-tire-form-modal,#sa-tire-detail-modal{z-index:99999!important}
+#sa-tire-form-modal .sa-tire-form-panel,#sa-tire-detail-modal .sa-tire-form-panel{width:min(850px,calc(100vw - 32px));max-width:850px;max-height:88vh;overflow:auto;background:linear-gradient(140deg,#20392d,#182b27 60%,#20334c)!important;border:1px solid #5a766c!important;border-radius:20px!important;padding:23px!important;color:#eff8f1!important;box-shadow:0 28px 85px #0009!important}
+.sa-tire-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:21px}.sa-tire-modal-head h2{margin:0 0 5px;font-size:20px;font-weight:850;color:#fff}.sa-tire-modal-head p{font-size:12px;color:#b4c9bd;margin:0}.sa-tire-modal-head>button{background:none;border:0;color:#e7f1e9;font-size:23px;cursor:pointer}
+.sa-tire-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.sa-tire-fields label,.sa-tire-item-fields label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:#d4e4d9}
+.sa-tire-fields input::placeholder,.sa-tire-item-fields input::placeholder{color:#9fb0a5}
+.sa-tire-items-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:24px 0 13px}.sa-tire-items-head h3{font-size:15px;font-weight:800;margin:0;color:#fff}
+.sa-tire-form-item{padding:14px;border:1px solid #52705e;background:#172c23;border-radius:12px;margin-bottom:10px}
+.sa-tire-item-fields{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.2fr .65fr;gap:9px;align-items:end}.sa-tire-item-fields input{font-size:12px}.sa-tire-item-remove{background:#462c2d;color:#f9dada;border:1px solid #864849;border-radius:8px;padding:8px 10px;cursor:pointer;margin-top:9px;font-size:12px}
+.sa-tire-hint{font-size:12px;color:#adc1b4;margin:12px 0}.sa-tire-modal-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;border-top:1px solid #55705d;padding-top:17px}
+.sa-tire-detail-box{border:1px solid #456451;border-radius:12px;padding:15px;margin:12px 0;background:#14261e}.sa-tire-detail-box h3{color:#fff;font-size:14px;margin:0 0 7px}.sa-tire-detail-box p{color:#d0e2d5;font-size:12px;margin:5px 0}.sa-tire-return-row{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:12px}.sa-tire-return-row input{max-width:130px}.sa-tire-return-row button{align-self:end}.sa-tire-history{margin-top:8px;color:#b4d6c3;font-size:11px;line-height:1.5}
+@media(max-width:850px){.sa-tire-item-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.sa-tire-kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sa-tire-fields,.sa-tire-item-fields{grid-template-columns:1fr}.sa-tire-toolbar input,.sa-tire-toolbar select,.sa-tire-toolbar button{flex:1 1 100%}.sa-tire-modal-foot{flex-wrap:wrap}}
+</style>
+
+<style id="sa-tire-beta4-polished">
+/* BETA 5 – acabamento coerente com a janela Novo Conserto da Central. */
+#repairs-modal {
+  --tire-line:rgba(166,191,179,.20);
+  --tire-muted:#b5c7bf;
+  --tire-ink:#f1f8f4;
+  --tire-soft:rgba(255,255,255,.045);
+  --tire-field:rgba(255,255,255,.065);
+  --tire-green:#35a675;
+}
+/* Navegação da janela existente: menos altura e destaque apenas na guia ativa. */
+body.sa-dark #repairs-modal .sa-tire-tabs {
+  display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;
+  border-bottom:1px solid rgba(178,206,193,.13)!important;
+  margin:0 0 18px!important;padding:0 0 13px!important;
+}
+body.sa-dark #repairs-modal .sa-tire-tabs button {
+  border:1px solid rgba(167,199,181,.18)!important;
+  border-radius:10px!important;padding:10px 15px!important;
+  background:rgba(255,255,255,.045)!important;color:#b9cfc2!important;
+  font-size:12.5px!important;font-weight:750!important;line-height:1.2!important;
+  box-shadow:none!important;backdrop-filter:none!important;transform:none!important;
+  transition:background .15s ease,border-color .15s ease,color .15s ease!important;
+}
+body.sa-dark #repairs-modal .sa-tire-tabs button:hover {
+  background:rgba(255,255,255,.09)!important;color:#fff!important;
+  border-color:rgba(139,187,160,.28)!important;
+}
+body.sa-dark #repairs-modal .sa-tire-tabs button.active {
+  background:linear-gradient(105deg,rgba(40,123,83,.28),rgba(43,86,96,.23))!important;
+  border-color:rgba(74,185,127,.48)!important;color:#f7fff9!important;
+  box-shadow:inset 0 -2px rgba(77,217,145,.6)!important;
+}
+body.sa-dark #repairs-modal .sa-tire-testbadge {
+  color:#91dfb5!important;background:rgba(52,138,90,.14)!important;
+  border:1px solid rgba(102,193,138,.22)!important;
+  border-radius:6px!important;font-size:9px!important;font-weight:750!important;
+  padding:3px 6px!important;margin-left:7px!important;
+}
+#sa-tire-area .sa-tire-notice {
+  display:flex;align-items:center;gap:11px;
+  background:rgba(37,59,47,.44)!important;
+  border:1px solid rgba(118,169,139,.21)!important;
+  border-left:3px solid rgba(78,190,126,.70)!important;
+  border-radius:10px!important;color:#c3d8cb!important;
+  padding:10px 13px!important;margin:0 0 16px!important;
+  font-size:11.5px!important;line-height:1.5!important;
+  box-shadow:none!important;backdrop-filter:none!important;
+}
+#sa-tire-area .sa-tire-notice strong {color:#f1fff5!important}
+/* Quatro indicadores com proporção e hierarquia idênticas. */
+#sa-tire-area .sa-tire-kpis {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important;margin-bottom:16px!important;}
+#sa-tire-area .sa-tire-kpi {
+  position:relative;border:1px solid rgba(172,202,183,.19)!important;
+  background:linear-gradient(126deg,rgba(255,255,255,.065),rgba(255,255,255,.025))!important;
+  border-radius:13px!important;padding:15px 16px!important;min-width:0!important;
+  min-height:91px!important;overflow:hidden!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
+  backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;
+}
+#sa-tire-area .sa-tire-kpi::after {display:none!important}
+#sa-tire-area .sa-tire-kpi:nth-child(1){border-top:2px solid rgba(77,183,128,.48)!important}
+#sa-tire-area .sa-tire-kpi:nth-child(2){border-top:2px solid rgba(107,159,194,.52)!important}
+#sa-tire-area .sa-tire-kpi:nth-child(3){border-top:2px solid rgba(205,161,93,.56)!important}
+#sa-tire-area .sa-tire-kpi:nth-child(4){border-top:2px solid rgba(107,201,148,.48)!important}
+#sa-tire-area .sa-tire-kpi span {display:block;margin:0 0 9px!important;color:#b8c9c1!important;font-size:10.5px!important;letter-spacing:.065em!important;font-weight:800!important}
+#sa-tire-area .sa-tire-kpi strong {display:block;font-size:28px!important;line-height:1!important;font-weight:850!important;color:#f5fff8!important}
+/* Busca: tamanhos controlados sem forçar os elementos para fora do modal. */
+#sa-tire-area .sa-tire-toolbar {display:grid!important;grid-template-columns:minmax(220px,1.9fr) minmax(155px,1fr) auto!important;align-items:stretch!important;gap:10px!important;margin-bottom:15px!important}
+#sa-tire-area .sa-tire-toolbar>* {width:100%!important;min-width:0!important;height:43px!important;min-height:43px!important;margin:0!important;box-sizing:border-box!important}
+body.sa-dark #repairs-modal .sa-tire-toolbar input,
+body.sa-dark #repairs-modal .sa-tire-toolbar select {
+  background:rgba(235,252,243,.065)!important;border:1px solid rgba(165,193,177,.26)!important;
+  border-radius:10px!important;color:#edf7f0!important;box-shadow:none!important;
+  padding:9px 12px!important;font:inherit;font-size:12.5px!important;backdrop-filter:none!important;
+}
+body.sa-dark #repairs-modal .sa-tire-toolbar input::placeholder{color:#a3b8ae!important}
+#sa-tire-area .sa-tire-toolbar .sa-tire-primary {white-space:nowrap!important;padding:0 17px!important;font-size:12px!important;}
+/* Botões compactos, verde somente nas ações primárias. */
+body.sa-dark .sa-tire-primary {
+  background:linear-gradient(135deg,#319d70,#298c6d)!important;border:1px solid rgba(107,207,151,.34)!important;
+  color:#f8fffa!important;border-radius:10px!important;
+  padding:10px 14px!important;min-height:42px!important;font-size:12.5px!important;
+  font-weight:750!important;box-shadow:none!important;transform:none!important;
+  transition:filter .15s ease,background .15s ease!important;
+}
+body.sa-dark .sa-tire-primary:hover {filter:brightness(1.10)!important;transform:none!important}
+body.sa-dark .sa-tire-outline {
+  background:rgba(255,255,255,.065)!important;border:1px solid rgba(160,193,174,.27)!important;
+  color:#e6f2eb!important;border-radius:10px!important;
+  padding:10px 14px!important;min-height:42px!important;box-shadow:none!important;
+  font-size:12px!important;font-weight:750!important;transform:none!important;
+}
+body.sa-dark .sa-tire-outline:hover{background:rgba(255,255,255,.11)!important;border-color:rgba(156,210,179,.42)!important}
+/* Tabela: mais leve, cabeçalho neutro e mesmo padrão das remessas existentes. */
+#sa-tire-area .sa-tire-tablewrap {
+  max-height:46vh!important;border:1px solid rgba(147,179,159,.18)!important;
+  border-radius:12px!important;background:rgba(5,13,12,.15)!important;
+  box-shadow:none!important;overflow:auto!important;
+}
+body.sa-dark #sa-tire-area .sa-tire-tablewrap table {border-collapse:collapse!important;}
+body.sa-dark #sa-tire-area .sa-tire-tablewrap th {
+  background:rgba(223,246,235,.085)!important;color:#c5d4cc!important;
+  font-size:10px!important;font-weight:800!important;letter-spacing:.06em!important;
+  text-transform:uppercase!important;padding:12px 11px!important;
+}
+body.sa-dark #sa-tire-area .sa-tire-tablewrap td {
+  background:rgba(13,28,23,.20)!important;color:#ebf3ef!important;
+  border-top:1px solid rgba(130,169,144,.13)!important;
+  padding:12px 11px!important;font-size:12px!important;
+}
+body.sa-dark #sa-tire-area .sa-tire-tablewrap tr:hover td{background:rgba(255,255,255,.055)!important}
+body.sa-dark #sa-tire-area .sa-tire-tablewrap button {
+  background:rgba(109,171,133,.10)!important;border:1px solid rgba(132,189,155,.21)!important;
+  border-radius:8px!important;color:#c5f1d6!important;padding:7px 9px!important;
+}
+body.sa-dark #sa-tire-area .sa-tire-pill {
+  background:rgba(184,144,78,.15)!important;color:#e9c590!important;
+  border:1px solid rgba(194,158,93,.20)!important;border-radius:100px!important;
+}
+body.sa-dark #sa-tire-area .sa-tire-pill.done{
+  background:rgba(50,149,91,.14)!important;color:#a3e8be!important;
+  border-color:rgba(107,191,133,.22)!important;
+}
+#sa-tire-area .sa-tire-empty {padding:25px!important;font-size:12px!important;color:#b5c5bd!important}
+/* Diálogos: replicam os consertos existentes com vidro sutil e acabamento sólido. */
+body.sa-dark #sa-tire-form-modal,
+body.sa-dark #sa-tire-detail-modal {
+  align-items:center!important;justify-content:center!important;
+  background:rgba(0,6,5,.70)!important;
+  backdrop-filter:blur(6px) saturate(110%)!important;
+  -webkit-backdrop-filter:blur(6px) saturate(110%)!important;
+  padding:14px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel,
+body.sa-dark #sa-tire-detail-modal .sa-tire-form-panel {
+  display:flex!important;flex-direction:column!important;min-height:0!important;
+  width:min(836px,calc(100vw - 28px))!important;max-width:836px!important;
+  height:auto!important;max-height:min(820px,calc(100dvh - 28px))!important;
+  background:linear-gradient(120deg,rgba(32,53,45,.97) 0%,rgba(32,45,49,.96) 55%,rgba(29,41,56,.96) 100%)!important;
+  border:1px solid rgba(173,199,183,.29)!important;
+  border-radius:18px!important;
+  padding:0!important;color:#f1f8f4!important;
+  box-shadow:0 30px 75px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.065)!important;
+  backdrop-filter:blur(17px)!important;-webkit-backdrop-filter:blur(17px)!important;
+  overflow:hidden!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head,
+body.sa-dark #sa-tire-detail-modal .sa-tire-modal-head {
+  flex:0 0 auto!important;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;gap:14px!important;
+  padding:20px 23px 17px!important;margin:0!important;
+  border-bottom:1px solid rgba(165,190,177,.15)!important;
+  background:rgba(255,255,255,.02)!important;
+}
+body.sa-dark .sa-tire-modal-head h2 {
+  margin:0 0 4px!important;font-size:20px!important;font-weight:800!important;
+  letter-spacing:-.025em!important;color:#f8fffa!important;
+}
+body.sa-dark .sa-tire-modal-head p{margin:0!important;font-size:12px!important;color:#bbcec3!important;line-height:1.45!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head>button,
+body.sa-dark #sa-tire-detail-modal .sa-tire-modal-head>button {
+  display:grid!important;place-items:center!important;
+  flex:0 0 34px!important;width:34px!important;height:34px!important;
+  border-radius:9px!important;border:1px solid rgba(163,193,175,.20)!important;
+  background:rgba(255,255,255,.04)!important;color:#edf9f1!important;
+  font-size:19px!important;box-shadow:none!important;
+}
+body.sa-dark .sa-tire-form-panel .sa-tire-eyebrow {
+  font-size:10px!important;color:#89c9a6!important;font-weight:800!important;
+  letter-spacing:.11em!important;margin:0 0 13px!important;
+}
+/* Área central é a única que rola; a ação Salvar nunca fica escondida. */
+body.sa-dark #sa-tire-form-modal #sa-tire-form {
+  display:flex!important;flex-direction:column!important;min-height:0!important;
+  overflow:hidden!important;flex:1 1 auto!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-scroll,
+body.sa-dark #sa-tire-detail-modal #sa-tire-detail-content {
+  overflow-y:auto!important;overflow-x:hidden!important;
+  min-height:0!important;flex:1 1 auto!important;
+  padding:19px 23px 16px!important;
+  overscroll-behavior:contain!important;
+  scrollbar-width:thin;scrollbar-color:rgba(160,183,171,.45) transparent;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-fields {
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px 16px!important;
+}
+body.sa-dark .sa-tire-form-panel label {
+  display:flex!important;flex-direction:column!important;gap:6px!important;
+  font-size:12px!important;color:#d2dfd6!important;font-weight:650!important;
+}
+body.sa-dark .sa-tire-form-panel input,
+body.sa-dark .sa-tire-form-panel textarea,
+body.sa-dark .sa-tire-form-panel select {
+  background:rgba(232,245,239,.065)!important;color:#edf7f0!important;
+  border:1px solid rgba(192,215,201,.29)!important;border-radius:10px!important;
+  min-height:43px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.055)!important;
+  backdrop-filter:none!important;padding:10px 12px!important;
+  font-size:12.5px!important;font-weight:500!important;width:100%!important;min-width:0!important;
+}
+body.sa-dark .sa-tire-form-panel input::placeholder{color:#abbcb2!important;opacity:1!important}
+body.sa-dark .sa-tire-form-panel input:focus,
+body.sa-dark .sa-tire-form-panel textarea:focus {
+  outline:0!important;border-color:#62ca91!important;
+  box-shadow:0 0 0 2px rgba(84,189,128,.17)!important;
+}
+body.sa-dark .sa-tire-items-head {
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;margin:23px 0 12px!important;padding-top:16px!important;
+  border-top:1px solid rgba(179,202,184,.14)!important;
+}
+body.sa-dark .sa-tire-items-head h3{margin:0!important;color:#f5fcf7!important;font-size:14px!important;font-weight:800!important}
+body.sa-dark .sa-tire-items-head .sa-tire-outline{min-height:36px!important;padding:8px 12px!important;font-size:12px!important}
+body.sa-dark .sa-tire-form-item,
+body.sa-dark .sa-tire-detail-box {
+  background:rgba(10,24,19,.26)!important;border:1px solid rgba(158,187,170,.20)!important;
+  border-radius:12px!important;padding:14px!important;margin-bottom:10px!important;
+  box-shadow:none!important;
+}
+body.sa-dark .sa-tire-item-fields {display:grid!important;grid-template-columns:minmax(95px,1fr) minmax(85px,.8fr) minmax(110px,1fr) minmax(110px,1.05fr) 74px!important;gap:10px!important;align-items:end!important}
+body.sa-dark .sa-tire-item-fields label{font-size:11px!important}
+body.sa-dark .sa-tire-item-fields input {min-height:40px!important;padding:9px 10px!important;font-size:12px!important}
+body.sa-dark .sa-tire-item-remove {
+  background:rgba(136,60,57,.12)!important;color:#f1c3c1!important;
+  border:1px solid rgba(204,108,106,.26)!important;
+  border-radius:8px!important;font-size:11px!important;padding:7px 10px!important;margin-top:9px!important;
+}
+body.sa-dark .sa-tire-hint {margin:13px 0 0!important;font-size:11px!important;line-height:1.5!important;color:#aebfb4!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot,
+body.sa-dark #sa-tire-detail-modal .sa-tire-modal-foot {
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;
+  gap:9px!important;padding:15px 23px!important;margin:0!important;
+  flex:0 0 auto!important;border-top:1px solid rgba(167,200,180,.18)!important;
+  background:rgba(5,19,15,.27)!important;
+  box-shadow:none!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot button,
+body.sa-dark #sa-tire-detail-modal .sa-tire-modal-foot button {min-width:125px!important}
+body.sa-dark #sa-tire-detail-modal #sa-tire-detail-content {padding-top:16px!important;}
+body.sa-dark .sa-tire-detail-box h3{margin:0 0 8px!important;color:#f5fcf7!important;font-size:14px!important}
+body.sa-dark .sa-tire-detail-box p{font-size:12px!important;color:#c8d8cf!important;line-height:1.5!important}
+body.sa-dark .sa-tire-detail-box .sa-tire-return-row {display:grid!important;grid-template-columns:90px 145px minmax(110px,1fr) auto!important;align-items:end!important;gap:10px!important;margin-top:13px!important}
+body.sa-dark .sa-tire-detail-box .sa-tire-return-row input{max-width:unset!important}
+body.sa-dark .sa-tire-detail-box .sa-tire-history{color:#b1d0be!important;line-height:1.6!important;margin-top:10px!important}
+body.sa-dark .sa-tire-modal-head button:focus-visible,
+body.sa-dark .sa-tire-tabs button:focus-visible,
+body.sa-dark .sa-tire-form-panel button:focus-visible{outline:2px solid #66d698!important;outline-offset:2px!important}
+@media(max-width:900px){
+  #sa-tire-area .sa-tire-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.sa-dark .sa-tire-item-fields{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.sa-dark .sa-tire-item-fields label:last-of-type{grid-column:auto!important}
+  body.sa-dark .sa-tire-detail-box .sa-tire-return-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:650px){
+  #sa-tire-area .sa-tire-toolbar{grid-template-columns:1fr!important}
+  body.sa-dark #sa-tire-form-modal .sa-tire-fields{grid-template-columns:1fr!important}
+  body.sa-dark #sa-tire-form-modal .sa-tire-form-scroll,
+  body.sa-dark #sa-tire-detail-modal #sa-tire-detail-content{padding:16px!important}
+  body.sa-dark #sa-tire-form-modal .sa-tire-modal-head,
+  body.sa-dark #sa-tire-detail-modal .sa-tire-modal-head{padding:17px 16px 14px!important}
+  body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot,
+  body.sa-dark #sa-tire-detail-modal .sa-tire-modal-foot{padding:12px 16px!important}
+  body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot button{flex:1 1 auto!important;min-width:0!important}
+}
+@media(max-width:450px){
+  #sa-tire-area .sa-tire-kpis{gap:8px!important}
+  #sa-tire-area .sa-tire-kpi{min-height:82px!important;padding:12px!important}
+  #sa-tire-area .sa-tire-kpi strong{font-size:25px!important}
+  body.sa-dark .sa-tire-item-fields{grid-template-columns:1fr!important}
+}
+@media(prefers-reduced-motion:reduce){body.sa-dark .sa-tire-tabs button,body.sa-dark .sa-tire-primary{transition:none!important}}
+</style>
+
+<style id="sa-tire-beta5-structural-redesign">
+/* BETA 5 · alterações estruturais, não apenas cor/bordas */
+body.sa-dark #sa-tire-form-modal,
+body.sa-dark #sa-tire-detail-modal{background:rgba(1,7,6,.76)!important;backdrop-filter:blur(7px)!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel{
+ max-width:880px!important;width:min(880px,calc(100vw - 30px))!important;
+ max-height:min(92dvh,940px)!important;
+ background:linear-gradient(145deg,rgba(16,29,24,.98),rgba(20,31,28,.98))!important;
+ border:1px solid rgba(126,160,143,.24)!important;
+ box-shadow:0 28px 90px rgba(0,0,0,.58)!important;
+ border-radius:20px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head{
+ background:rgba(255,255,255,.012)!important;
+ padding:22px 26px 19px!important;
+ border-bottom:1px solid rgba(145,176,154,.17)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head h2{font-size:24px!important;line-height:1.18!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head p{font-size:13px!important;margin-top:6px!important;color:#afc5b9!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-scroll{padding:22px 26px 24px!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-title{
+ display:flex!important;align-items:center!important;gap:12px!important;
+ margin:0 0 17px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-no{
+ flex:0 0 35px;display:grid;place-items:center;width:35px;height:35px;border-radius:11px;
+ background:#183d2b;color:#7be4a8;border:1px solid rgba(80,182,120,.25);
+ font-weight:900;font-size:12px;letter-spacing:.02em;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-title strong{display:block;color:#f3fbf5;font-size:16px;line-height:1.2;font-weight:800}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-title small{display:block;color:#9eb9a9;font-size:11.5px;margin-top:4px;font-weight:500}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-meta{margin-left:auto;color:#829e8e;font-size:11px}
+body.sa-dark #sa-tire-form-modal .sa-tire-fields{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:15px 18px!important;
+ background:rgba(255,255,255,.018)!important;
+ padding:19px!important;border:1px solid rgba(114,152,127,.14)!important;
+ border-radius:14px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel label{
+ color:#c5dbcd!important;letter-spacing:0!important;font-size:12px!important;font-weight:650!important;gap:7px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel input{
+ background:rgba(230,244,235,.048)!important;
+ border:1px solid rgba(166,193,175,.25)!important;
+ border-radius:9px!important;
+ min-height:44px!important;
+ font-size:13px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel input:focus{border-color:#62c590!important;box-shadow:0 0 0 3px rgba(79,184,125,.12)!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-head{
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+ gap:12px!important;flex-wrap:wrap!important;
+ margin:26px 0 8px!important;padding:23px 0 0!important;
+ border-top:1px solid rgba(116,160,132,.19)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-head .sa-tire-step-title{margin:0!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-counter{font-size:11px;color:#819c8b;text-align:right;margin:0 1px 13px}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-head button{
+ background:rgba(39,88,61,.28)!important;
+ color:#c9f0d7!important;
+ border-color:rgba(90,178,121,.33)!important;
+ border-radius:10px!important;min-height:38px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-item{
+ background:linear-gradient(135deg,rgba(22,42,31,.75),rgba(21,36,32,.65))!important;
+ border:1px solid rgba(113,161,132,.23)!important;
+ border-radius:15px!important;
+ padding:0!important;margin:0 0 13px!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-card-head{
+ padding:12px 17px!important;
+ border-bottom:1px solid rgba(121,166,136,.17)!important;
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ background:rgba(0,0,0,.07);
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-card-id{display:flex;align-items:center;gap:10px!important;min-width:0}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-card-id strong{font-size:12px;color:#b7cfc0;font-weight:600}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-number{
+ background:#214a33;color:#b1edca;border:1px solid rgba(106,195,136,.19);
+ border-radius:6px;padding:5px 9px;font-size:10px;font-weight:850;letter-spacing:.09em;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-remove{
+ margin:0!important;padding:6px 10px!important;background:transparent!important;
+ border:1px solid rgba(198,109,102,.22)!important;color:#e5b9b2!important;
+ font-size:11px!important;border-radius:8px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-fields{
+ display:grid!important;grid-template-columns:1fr 1fr!important;
+ column-gap:16px!important;row-gap:14px!important;
+ padding:17px!important;align-items:start!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-item-fields label{min-width:0!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-field-measure{grid-column:1!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-field-id{grid-column:2!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-field-brand{grid-column:1!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-field-qty{grid-column:2!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-field-defect{grid-column:1/-1!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-hint{
+ border-radius:10px;color:#9fbaa9!important;
+ background:rgba(64,114,79,.08);border:1px solid rgba(99,159,111,.13);
+ padding:11px 13px;font-size:12px!important;line-height:1.5!important;margin:9px 0 3px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
+ position:relative!important;background:#111f18!important;
+ border-top:1px solid rgba(125,171,143,.24)!important;
+ gap:11px!important;padding:16px 26px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-foot-info{
+ margin-right:auto;color:#8daa99;font-size:11px;line-height:1.35;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot button{min-width:132px!important;padding:11px 16px!important}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot .sa-tire-primary{
+ background:#279b65!important;color:#fff!important;border:1px solid #3bb97b!important;
+ box-shadow:none!important;border-radius:10px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot .sa-tire-outline{
+ background:rgba(255,255,255,.035)!important;color:#d2dfd6!important;
+ border:1px solid rgba(146,176,157,.22)!important;border-radius:10px!important;
+}
+/* Visual da guia de pneus: mesmos materiais do painel original, sem brilho exagerado. */
+body.sa-dark #repairs-modal .sa-tire-kpi{
+ background:rgba(18,32,24,.69)!important;
+ border:1px solid rgba(108,151,121,.22)!important;
+ box-shadow:none!important;border-radius:12px!important;padding:16px 17px!important;
+}
+body.sa-dark #repairs-modal .sa-tire-kpi strong{font-size:29px!important}
+body.sa-dark #repairs-modal .sa-tire-kpi:after{display:none!important}
+body.sa-dark #repairs-modal .sa-tire-notice{
+ background:rgba(49,83,60,.14)!important;border:1px solid rgba(111,168,128,.18)!important;
+ border-left:3px solid #388f61!important;color:#aec9b7!important;
+ border-radius:9px!important;box-shadow:none!important;
+}
+body.sa-dark #repairs-modal .sa-tire-tablewrap{box-shadow:none!important;border-color:rgba(105,144,118,.24)!important;border-radius:12px!important}
+body.sa-dark #repairs-modal .sa-tire-tabs button{box-shadow:none!important}
+@media(max-width:720px){
+ body.sa-dark #sa-tire-form-modal .sa-tire-fields{grid-template-columns:1fr!important;gap:12px!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-form-scroll{padding:16px!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-items-head{align-items:flex-start!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{padding:12px 16px!important;flex-wrap:wrap!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-foot-info{flex-basis:100%;font-size:10px}
+}
+@media(max-width:500px){
+ body.sa-dark #sa-tire-form-modal .sa-tire-item-fields{grid-template-columns:1fr!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-field-measure,
+ body.sa-dark #sa-tire-form-modal .sa-tire-field-id,
+ body.sa-dark #sa-tire-form-modal .sa-tire-field-brand,
+ body.sa-dark #sa-tire-form-modal .sa-tire-field-qty,
+ body.sa-dark #sa-tire-form-modal .sa-tire-field-defect{grid-column:1!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-step-meta{display:none}
+ body.sa-dark #sa-tire-form-modal .sa-tire-modal-head h2{font-size:20px!important}
+ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot button{flex:1 1 auto!important;min-width:0!important}
+}
+</style>
+
+<style id="beta5b-liquid-glass-transparent">
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(80,195,129,.10), transparent 24%),
+    radial-gradient(circle at 88% 20%, rgba(88,159,228,.11), transparent 26%),
+    linear-gradient(135deg, rgba(8,22,18,.58), rgba(12,25,27,.52) 55%, rgba(18,31,45,.50))!important;
+  border:1px solid rgba(164,218,192,.20)!important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 28px 72px rgba(0,0,0,.38)!important;
+  backdrop-filter: blur(22px) saturate(145%)!important;
+  -webkit-backdrop-filter: blur(22px) saturate(145%)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-head{
+  border-bottom:1px solid rgba(188,224,205,.10)!important;
+  padding-bottom:16px!important;
+  margin-bottom:18px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-title{
+  background:linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.015))!important;
+  border:1px solid rgba(172,221,194,.12)!important;
+  border-radius:18px!important;
+  padding:12px 14px!important;
+  margin-bottom:16px!important;
+  backdrop-filter: blur(14px)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-step-no{
+  background:linear-gradient(135deg, rgba(52,161,104,.28), rgba(34,108,79,.26))!important;
+  border:1px solid rgba(107,218,159,.22)!important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-meta-fields{
+  position:relative;
+  padding:18px!important;
+  border-radius:20px!important;
+  border:1px solid rgba(176,225,199,.14)!important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.018))!important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 28px rgba(0,0,0,.14)!important;
+  backdrop-filter: blur(16px) saturate(135%)!important;
+  -webkit-backdrop-filter: blur(16px) saturate(135%)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-meta-fields::before{
+  content:''; position:absolute; inset:0; border-radius:20px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0));
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-meta-fields label{position:relative; z-index:1;}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel input,
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel textarea,
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel select{
+  background:linear-gradient(135deg, rgba(255,255,255,.085), rgba(255,255,255,.03))!important;
+  border:1px solid rgba(181,219,199,.22)!important;
+  color:#f4fbf7!important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06)!important;
+  backdrop-filter: blur(10px)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel input:focus,
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel textarea:focus,
+body.sa-dark #sa-tire-form-modal .sa-tire-form-panel select:focus{
+  border-color:rgba(112,222,163,.45)!important;
+  box-shadow:0 0 0 3px rgba(78,185,126,.12), inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-head{
+  margin-top:18px!important;
+  padding-top:16px!important;
+  border-top:1px solid rgba(182,224,201,.10)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-items-counter{
+  color:#98b5a6!important;
+  margin:8px 0 12px!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-form-item{
+  background:linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.018))!important;
+  border:1px solid rgba(174,220,196,.13)!important;
+  border-radius:18px!important;
+  backdrop-filter: blur(12px)!important;
+}
+body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
+  background:linear-gradient(180deg, rgba(0,0,0,0), rgba(10,18,18,.18))!important;
+}
+</style>
 </head>
  <body data-template-id="__page-root" class="w-full full-vh bg-slate-50" style="background: rgb(241, 245, 249);">
 <script>window.__saApplyBodyTheme&&window.__saApplyBodyTheme();</script>
@@ -2266,6 +2811,11 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
      </div>
     </div>
 
+    <div class="sa-tire-tabs" role="tablist" aria-label="Tipo de conserto">
+      <button id="sa-repair-tab-parts" type="button" class="active" role="tab" aria-selected="true" onclick="saTireSwitchTab('parts')">🔧 Consertos de Peças</button>
+      <button id="sa-repair-tab-tires" type="button" role="tab" aria-selected="false" onclick="saTireSwitchTab('tires')">◉ Consertos de Pneus</button>
+    </div>
+    <div id="sa-repair-parts-area">
     <div class="mb-5 grid grid-cols-2 gap-3 md:grid-cols-5">
       <div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><div class="text-xs font-bold uppercase tracking-wider text-slate-500">Total</div><div id="repair-stat-total" class="mt-1 text-2xl font-extrabold text-slate-800">0</div></div>
       <div class="rounded-xl border border-amber-200 bg-amber-50 p-4"><div class="text-xs font-bold uppercase tracking-wider text-amber-700">Em manutenção</div><div id="repair-stat-maintenance" class="mt-1 text-2xl font-extrabold text-amber-700">0</div></div>
@@ -2296,9 +2846,47 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
      </table>
     </div>
     <div id="empty-repairs" class="hidden py-10 text-center text-slate-400"><p>Nenhum conserto cadastrado.</p></div>
+    </div>
+    <div id="sa-tire-area" hidden>
+      <div class="sa-tire-notice">Remessas sincronizadas com o Supabase. Envio, retorno parcial e histórico registrados para toda a equipe.</div>
+      <div class="sa-tire-kpis">
+        <div class="sa-tire-kpi"><span>REMESSAS</span><strong id="sa-tire-kpi-total">0</strong></div>
+        <div class="sa-tire-kpi"><span>PNEUS ENVIADOS</span><strong id="sa-tire-kpi-sent">0</strong></div>
+        <div class="sa-tire-kpi"><span>PENDENTES</span><strong id="sa-tire-kpi-pending">0</strong></div>
+        <div class="sa-tire-kpi"><span>RETORNADOS</span><strong id="sa-tire-kpi-returned">0</strong></div>
+      </div>
+      <div class="sa-tire-toolbar"><input id="sa-tire-search" placeholder="Buscar por NF, patrimônio, fornecedor, medida..." oninput="saTireRender()" aria-label="Pesquisar remessas"><select id="sa-tire-status" onchange="saTireRender()"><option value="">Todas as situações</option><option value="Pendente">Pendente</option><option value="Parcial">Retorno parcial</option><option value="Finalizada">Finalizada</option></select><button class="sa-tire-outline" type="button" onclick="saTireLoad()">↻ Atualizar</button><button class="sa-tire-primary" type="button" onclick="saTireOpenForm()">+ Nova Remessa de Pneus</button></div>
+      <div class="sa-tire-tablewrap"><table><thead><tr><th>Envio</th><th>NF saída</th><th>Patrimônio</th><th>Fornecedor</th><th>Enviados</th><th>Retornados</th><th>Pendentes</th><th>Status</th><th>Ações</th></tr></thead><tbody id="sa-tire-body"></tbody></table></div>
+      <div id="sa-tire-sync-status" role="status" aria-live="polite" style="padding:10px 2px;color:#b4cfc0;font-size:12px"></div><div id="sa-tire-empty" class="sa-tire-empty">Nenhuma remessa de pneus cadastrada no Supabase.</div>
+    </div>
    </div>
   </div>
 
+  <div id="sa-tire-form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="sa-tire-form-title" onclick="if(event.target===this)saTireCloseForm()">
+  <div class="modal-panel sa-tire-form-panel">
+    <div class="sa-tire-modal-head"><div><h2 id="sa-tire-form-title">Nova Remessa de Pneus</h2><p>Cadastre os pneus enviados para manutenção.</p></div><button aria-label="Fechar cadastro de remessa" type="button" onclick="saTireCloseForm()">✕</button></div>
+    <form id="sa-tire-form" onsubmit="saTireSave(event)">
+      <div class="sa-tire-form-scroll" tabindex="0" aria-label="Campos da remessa e pneus">
+      <div class="sa-tire-step-title"><span class="sa-tire-step-no">01</span><div><strong>Informações da remessa</strong><small>Dados de envio e identificação do fornecedor</small></div><span class="sa-tire-step-meta">Campos obrigatórios *</span></div>
+      <div class="sa-tire-fields sa-tire-meta-fields">
+        <label>Data do envio *<input id="sa-tire-date" type="date" required></label>
+        <label>Fornecedor / Borracharia *<input id="sa-tire-supplier" required placeholder="Fornecedor"></label>
+        <label>Patrimônio (MAQ, IMP ou VEC) *<input id="sa-tire-patrimony" required placeholder="Ex.: MAQ1200"></label>
+        <label>Nº da NF de saída *<input id="sa-tire-nf" required placeholder="Número da NF"></label>
+        <label>Responsável pelo envio *<input id="sa-tire-owner" required placeholder="Nome da pessoa"></label>
+        <label>Observação geral<input id="sa-tire-notes" placeholder="Informações adicionais"></label>
+      </div>
+      <div class="sa-tire-items-head"><div class="sa-tire-step-title"><span class="sa-tire-step-no">02</span><div><strong>Pneus enviados</strong><small>Cadastre individualmente ou por lote da mesma medida</small></div></div><button type="button" class="sa-tire-outline" onclick="saTireAddItem()">+ Adicionar pneu</button></div><div class="sa-tire-items-counter" id="sa-tire-items-counter" aria-live="polite">1 item cadastrado</div>
+      <div id="sa-tire-form-items"></div>
+<p class="sa-tire-hint"><span aria-hidden="true">ⓘ</span> O retorno pode ser parcial por item. Cada pneu ou lote terá seu próprio histórico.</p>
+      </div>
+      <div class="sa-tire-modal-foot"><span class="sa-tire-foot-info">● Dados das remessas salvos no Supabase</span><button type="button" class="sa-tire-outline" onclick="saTireCloseForm()">Cancelar</button><button type="submit" class="sa-tire-primary">Salvar remessa</button></div>
+    </form>
+  </div>
+</div>
+<div id="sa-tire-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="sa-tire-detail-title" onclick="if(event.target===this)saTireCloseDetail()">
+ <div class="modal-panel sa-tire-form-panel sa-tire-detail-panel"><div class="sa-tire-modal-head"><div><h2 id="sa-tire-detail-title">Controle de retorno de pneus</h2><p id="sa-tire-detail-meta"></p></div><button type="button" aria-label="Fechar detalhes da remessa" onclick="saTireCloseDetail()">✕</button></div><div id="sa-tire-detail-content"></div><div class="sa-tire-modal-foot"><button type="button" class="sa-tire-outline" onclick="saTireCloseDetail()">Fechar</button></div></div>
+</div>
   <div id="repair-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="repair-detail-title" onclick="if(event.target===this)closeRepairDetail()">
    <div class="modal-panel w-full max-w-4xl rounded-2xl bg-white p-6 shadow-xl">
     <div class="mb-4 flex items-center justify-between"><div><h2 id="repair-detail-title" class="text-lg font-bold text-slate-800">Detalhes do conserto</h2><p class="mt-1 text-sm text-slate-500">Acompanhe o ciclo completo da mercadoria.</p></div><button type="button" class="rounded-lg p-2 hover:bg-slate-100" onclick="closeRepairDetail()"><i data-lucide="x" class="h-5 w-5"></i></button></div>
@@ -3154,6 +3742,107 @@ body.sa-almox-view{position:fixed!important;top:var(--sa-almox-locked-top,0px)!i
       const box=document.getElementById('report-table-wrap'); const summary=document.getElementById('report-summary'); const w=window.open('','_blank'); if(!w)return;
       w.document.write(`<!doctype html><html><head><title>Relatório Serra Azul BF</title><style>body{font-family:Arial,sans-serif;color:#0f172a;padding:24px}h1{font-size:20px}p{color:#64748b}table{width:100%;border-collapse:collapse;margin-top:18px;font-size:12px}th,td{border:1px solid #e2e8f0;padding:7px;text-align:left}th{background:#f8fafc}.summary{display:flex;gap:10px}.summary div{border:1px solid #e2e8f0;padding:10px;min-width:120px}.summary b{display:block;font-size:18px;margin-top:4px}@media print{body{padding:0}}</style>
 </head><body><h1>Serra Azul BF — Relatório</h1><p>Gerado em ${new Date().toLocaleString('pt-BR')}</p><div class="summary">${summary.innerHTML}</div>${box.innerHTML}
+<script id="sa-tire-production-module">
+(function(){
+ 'use strict';
+
+ let records=[],busy=false,saving=false;
+ const $=id=>document.getElementById(id);
+ function escT(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
+ function sums(r){return {total:r.items.reduce((a,x)=>a+Number(x.qty||0),0),returned:r.items.reduce((a,x)=>a+Number(x.returned||0),0)}}
+ function getStatus(r){const x=sums(r);return x.returned===0?'Pendente':x.returned>=x.total?'Finalizada':'Parcial'}
+ function fmt(d){if(!d)return '—';const q=String(d).slice(0,10).split('-');return q.length===3?q[2]+'/'+q[1]+'/'+q[0]:'—'}
+ function byId(id){return records.find(x=>x.id===id)}
+
+ function active(){return typeof supabaseClient!=='undefined'&&!!supabaseClient;}
+ function isAdmin(){return typeof currentUserRole!=='undefined'&&currentUserRole==='admin';}
+ function dateToday(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+ function syncStatus(msg,err=false){const e=$('sa-tire-sync-status');if(e){e.textContent=msg;e.style.color=err?'#ffc4bd':'#b4cfc0';}}
+ async function fetchPages(table,fields){
+  const result=[];
+  for(let start=0;start<15000;start+=500){
+   const {data,error}=await supabaseClient.from(table).select(fields).order('created_at',{ascending:false}).range(start,start+499);
+   if(error)throw error;
+   result.push(...(data||[]));if(!data||data.length<500)return result;
+  }
+  throw new Error('Muitos registros. Solicite paginação ao administrador.');
+ }
+ window.saTireLoad=async function(){
+  if(busy)return;
+  if(!active())return syncStatus('Entre pela Central para acessar as remessas.',true);
+  busy=true;syncStatus('Sincronizando remessas de pneus...');
+  try{
+   const [ships,returns]=await Promise.all([
+    fetchPages('sa_tire_shipments','id,sent_date,supplier,patrimony,out_nf,responsible,notes,items,created_at'),
+    fetchPages('sa_tire_returns','id,shipment_id,item_index,qty,returned_on,return_nf,created_at')
+   ]);
+   const map=new Map();
+   for(const r of returns){const k=r.shipment_id+':'+r.item_index;if(!map.has(k))map.set(k,[]);map.get(k).push({qty:Number(r.qty),date:r.returned_on,nf:r.return_nf})}
+   records=ships.map(s=>({id:s.id,date:s.sent_date,supplier:s.supplier,patrimony:s.patrimony,nf:s.out_nf,owner:s.responsible,notes:s.notes,items:(Array.isArray(s.items)?s.items:[]).map((it,i)=>{
+     const history=map.get(s.id+':'+i)||[];return {...it,qty:Number(it.qty)||0,returned:history.reduce((a,x)=>a+x.qty,0),history};
+   })}));
+   saTireRender();syncStatus('Atualizado no Supabase às '+new Date().toLocaleTimeString('pt-BR'));
+  }catch(e){console.error('Pneus sincronização',e);syncStatus('Erro ao carregar pneus: '+(e?.message||e),true);}
+  finally{busy=false}
+ };
+
+ window.saTireSwitchTab=function(tab){const tires=tab==='tires';$('sa-repair-parts-area').hidden=tires;$('sa-tire-area').hidden=!tires;$('sa-repair-tab-parts').classList.toggle('active',!tires);$('sa-repair-tab-tires').classList.toggle('active',tires);$('sa-repair-tab-parts').setAttribute('aria-selected',String(!tires));$('sa-repair-tab-tires').setAttribute('aria-selected',String(tires));$('repairs-modal-title').textContent=tires?'◉ Controle de Pneus em Conserto':'🔧 Controle de Mercadorias em Conserto';if(tires){saTireRender();saTireLoad()}};
+ window.saTireRender=function(){
+  const q=($('sa-tire-search')?.value||'').toLowerCase().trim();const status=$('sa-tire-status')?.value||'';
+  let total=0,returned=0;for(const r of records){const t=sums(r);total+=t.total;returned+=t.returned}
+  $('sa-tire-kpi-total').textContent=records.length;$('sa-tire-kpi-sent').textContent=total;$('sa-tire-kpi-pending').textContent=total-returned;$('sa-tire-kpi-returned').textContent=returned;
+  const rows=records.filter(r=>(!status||getStatus(r)===status)&&(!q||[r.nf,r.patrimony,r.supplier,r.owner,...r.items.flatMap(x=>[x.measure,x.brand,x.identification,x.defect])].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  $('sa-tire-empty').hidden=rows.length>0;
+  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button><button type="button" onclick="saTireDelete('${r.id}')">Arquivar</button></td></tr>`}).join('');
+ };
+ let editing=null;
+ window.saTireOpenForm=function(){editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
+ window.saTireCloseForm=function(){$('sa-tire-form-modal').classList.add('hidden')};
+ window.saTireRefreshItemLabels=function(){const all=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')];all.forEach((card,i)=>{const label=card.querySelector('.sa-tire-item-number');if(label)label.textContent='PNEU '+String(i+1).padStart(2,'0')});const info=$('sa-tire-items-counter');if(info)info.textContent=all.length+' '+(all.length===1?'item cadastrado':'itens cadastrados')};
+ window.saTireRemoveItem=function(button){const all=$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item');if(all.length<=1){alert('A remessa precisa ter pelo menos um pneu.');return;}button.closest('.sa-tire-form-item')?.remove();saTireRefreshItemLabels();};
+ window.saTireAddItem=function(values={}){const div=document.createElement('div');div.className='sa-tire-form-item';div.innerHTML=`<div class="sa-tire-item-card-head"><div class="sa-tire-item-card-id"><span class="sa-tire-item-number">PNEU</span><strong>Detalhes do material</strong></div><button class="sa-tire-item-remove" type="button" onclick="saTireRemoveItem(this)" aria-label="Remover este pneu">✕ Remover</button></div><div class="sa-tire-item-fields"><label class="sa-tire-field-measure">Medida *<input class="ti-measure" required placeholder="Ex.: 18.4-30" value="${escT(values.measure||'')}"></label><label class="sa-tire-field-id">Identificação / Nº de fogo<input class="ti-id" placeholder="Ex.: PNEU-058" value="${escT(values.identification||'')}"></label><label class="sa-tire-field-brand">Marca<input class="ti-brand" placeholder="Marca do pneu" value="${escT(values.brand||'')}"></label><label class="sa-tire-field-qty">Quantidade *<input class="ti-qty" type="number" min="1" step="1" required value="${values.qty||1}"></label><label class="sa-tire-field-defect">Motivo / serviço solicitado<input class="ti-defect" placeholder="Ex.: recapagem, furo lateral, vulcanização" value="${escT(values.defect||'')}"></label></div>`;$('sa-tire-form-items').appendChild(div);saTireRefreshItemLabels()};
+ window.saTireSave=async function(e){
+  e.preventDefault();if(saving||!active())return;
+  const items=[...$('sa-tire-form-items').querySelectorAll('.sa-tire-form-item')].map(d=>({
+   measure:d.querySelector('.ti-measure').value.trim(),brand:d.querySelector('.ti-brand').value.trim(),
+   identification:d.querySelector('.ti-id').value.trim(),defect:d.querySelector('.ti-defect').value.trim(),
+   qty:Number(d.querySelector('.ti-qty').value)}));
+  if(!items.length||items.some(x=>!x.measure||!Number.isInteger(x.qty)||x.qty<=0))return alert('Informe ao menos um pneu com medida e quantidade inteira.');
+  const args={p_sent_date:$('sa-tire-date').value,p_supplier:$('sa-tire-supplier').value.trim(),p_patrimony:$('sa-tire-patrimony').value.trim(),p_out_nf:$('sa-tire-nf').value.trim(),p_responsible:$('sa-tire-owner').value.trim(),p_notes:$('sa-tire-notes').value.trim(),p_items:items};
+  if(!args.p_sent_date||!args.p_supplier||!args.p_patrimony||!args.p_out_nf||!args.p_responsible)return alert('Preencha os campos obrigatórios.');
+  saving=true;const btn=$('sa-tire-form').querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Salvando...';
+  try{const {error}=await supabaseClient.rpc('sa_tire_create_shipment',args);if(error)throw error;saTireCloseForm();await saTireLoad();alert('Remessa de pneus salva no Supabase.');}
+  catch(err){console.error('Pneus cadastro',err);alert('Não foi possível salvar: '+(err?.message||err))}
+  finally{saving=false;btn.disabled=false;btn.textContent='Salvar remessa'}
+ };
+ window.saTireDetail=function(id){const r=byId(id);if(!r)return;$('sa-tire-detail-meta').textContent='NF '+r.nf+' · '+r.patrimony+' · '+r.supplier+' · envio '+fmt(r.date);$('sa-tire-detail-modal').dataset.id=id;const html=r.items.map((x,i)=>{const pending=x.qty-x.returned;return `<div class="sa-tire-detail-box"><h3>${escT(x.measure)} · ${escT(x.brand)||'Sem marca'} · ${escT(x.identification)||'Sem identificação'}</h3><p>Defeito: ${escT(x.defect)||'Não informado'} · Enviados: <strong>${x.qty}</strong> · Retornados: <strong>${x.returned}</strong> · Pendentes: <strong>${pending}</strong></p>${pending>0?`<div class="sa-tire-return-row"><label>Qtd.<input id="sa-tr-qty-${i}" type="number" min="1" max="${pending}" step="1" value="${pending}"></label><label>Data<input id="sa-tr-date-${i}" type="date" value="${dateToday()}"></label><label>NF retorno<input id="sa-tr-nf-${i}" placeholder="Número da NF"></label><button type="button" class="sa-tire-primary" onclick="saTireReturn(${i})">Registrar retorno</button></div>`:'<p>✓ Todos os pneus deste item retornaram.</p>'}<div class="sa-tire-history">${(x.history||[]).map(h=>'↳ '+fmt(h.date)+' · '+h.qty+' un. · NF '+escT(h.nf||'não informada')).join('<br>')}</div></div>`}).join('');$('sa-tire-detail-content').innerHTML=html;$('sa-tire-detail-modal').classList.remove('hidden')};
+ window.saTireReturn=async function(index){
+  if(saving||!active())return;
+  const r=byId($('sa-tire-detail-modal').dataset.id),x=r?.items[index];if(!x)return;
+  const qty=Number($('sa-tr-qty-'+index).value),date=$('sa-tr-date-'+index).value,nf=$('sa-tr-nf-'+index).value.trim();
+  if(!Number.isInteger(qty)||qty<=0||qty>x.qty-x.returned)return alert('Quantidade de retorno inválida.');
+  if(!date||date<r.date)return alert('Data de retorno inválida.');
+  if(!confirm('Registrar retorno de '+qty+' pneu(s)?'))return;
+  saving=true;
+  try{const {error}=await supabaseClient.rpc('sa_tire_record_return',{p_shipment_id:r.id,p_item_index:index,p_quantity:qty,p_return_date:date,p_return_nf:nf});if(error)throw error;await saTireLoad();saTireDetail(r.id);}
+  catch(err){console.error('Pneus retorno',err);alert('Falha ao registrar retorno: '+(err?.message||err))}
+  finally{saving=false}
+ };
+ window.saTireCloseDetail=function(){$('sa-tire-detail-modal').classList.add('hidden')};
+ window.saTireDelete=async function(id){
+  if(!isAdmin())return alert('Somente o administrador pode arquivar remessas.');
+  const r=byId(id);if(!r)return;
+  const motivo=prompt('Justificativa para arquivar a NF '+r.nf+' (mínimo de 8 caracteres):');
+  if(motivo===null)return;if(motivo.trim().length<8)return alert('Informe a justificativa.');
+  if(!confirm('Confirmar arquivamento? O histórico será preservado.'))return;
+  const {error}=await supabaseClient.rpc('sa_tire_archive_shipment',{p_shipment_id:id,p_reason:motivo.trim()});
+  if(error)return alert('Não foi possível arquivar: '+error.message);
+  await saTireLoad();
+ };
+ const oldOpen=window.openRepairsModal;
+ if(typeof oldOpen==='function')window.openRepairsModal=function(){oldOpen.apply(this,arguments);saTireSwitchTab('parts')};
+})();
+</script>
 </body></html>`); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
     }
 
