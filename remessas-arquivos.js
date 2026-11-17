@@ -75,15 +75,18 @@
         feedback(panel,'Não foi possível abrir: '+(err.message||err),'error');
       }
     }));
-    if(uid===record.created_by || isAdmin()) {
+    if(uid===record.created_by || isAdmin() || record.storage_only) {
       actions.append(control('Excluir',async function(){
         if (!window.confirm('Excluir definitivamente o arquivo "'+record.original_name+'"?')) return;
         try {
           feedback(panel,'Excluindo documento...');
           var storage=await supabaseClient.storage.from(BUCKET).remove([record.storage_path]);
           if(storage.error) throw storage.error;
-          var db=await supabaseClient.from('sa_tire_attachments').delete().eq('id',record.id);
-          if(db.error) throw db.error;
+          if(!storage.data || !storage.data.length) throw new Error('Exclusão não autorizada.');
+          if(record.id) {
+            var db=await supabaseClient.from('sa_tire_attachments').delete().eq('id',record.id);
+            if(db.error) throw db.error;
+          }
           feedback(panel,'Documento excluído.','success');
           await loadFiles(panel.dataset.shipmentId,panel);
         } catch(err) { feedback(panel,'Falha ao excluir: '+(err.message||err),'error'); }
@@ -106,7 +109,26 @@
         .eq('shipment_id',id).order('created_at',{ascending:false});
       if(r.error) throw r.error;
       if (!matching(panel,id)) return;
-      var files=r.data||[];
+      // Mesma pasta para anexos antigos (Storage direto) e novos (Storage + cadastro).
+      // A fonte de arquivos é o bucket privado; o cadastro mantém nomes e autoria.
+      var registered=r.data||[];
+      var byPath=new Map(registered.map(function(f){return [f.storage_path,f];}));
+      var stored=await supabaseClient.storage.from(BUCKET).list(id,{limit:1000,sortBy:{column:'created_at',order:'desc'}});
+      if(stored.error) throw stored.error;
+      if(!matching(panel,id)) return;
+      var files=(stored.data||[]).filter(function(o){return o.id && o.name;}).map(function(o){
+        var path=id+'/'+o.name;
+        var known=byPath.get(path);
+        if(known){byPath.delete(path);return known;}
+        // Arquivos enviados pela primeira versão não têm linha em sa_tire_attachments.
+        var original=o.name.replace(/^[0-9a-f]{8}-[0-9a-f-]{27,}_/i,'');
+        return {id:null,shipment_id:id,original_name:original,storage_path:path,
+          byte_size:Number(o.metadata&&o.metadata.size||0),created_at:o.created_at||o.updated_at,
+          created_by:o.owner_id||null,storage_only:true};
+      });
+      // Se o Storage tiver algum arquivo temporariamente não listado, preserve o registro.
+      byPath.forEach(function(f){files.push(f);});
+      files.sort(function(a,b){return String(b.created_at||'').localeCompare(String(a.created_at||''));});
       count.textContent=files.length+' '+(files.length===1?'arquivo':'arquivos');
       list.replaceChildren();
       if(!files.length) {
