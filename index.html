@@ -2385,6 +2385,25 @@ body.sa-dark #sa-tire-form-modal .sa-tire-modal-foot{
 @media(max-width:600px){.sa-tire-save-feedback{margin:10px 14px 4px}}
 @media(prefers-reduced-motion:reduce){.sa-tire-save-feedback,.sa-tire-save-spinner,.sa-tire-save-feedback.is-loading .sa-tire-feedback-icon{animation:none}}
 </style>
+<style id="sa-tire-correct-maq-glass">
+#sa-tire-correct-maq-modal{z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}
+.sa-tire-maq-dialog{width:min(100%,480px);max-height:90vh;overflow:auto;padding:23px;border-radius:23px;background:linear-gradient(145deg,rgba(27,49,45,.97),rgba(16,30,31,.98));border:1px solid rgba(172,227,198,.21);box-shadow:0 24px 70px rgba(0,0,0,.56);backdrop-filter:blur(22px);color:#eefaf2}
+.sa-tire-maq-heading{display:flex;justify-content:space-between;gap:14px;margin-bottom:20px}
+.sa-tire-maq-heading small{font-size:10px;color:#98d4b1;letter-spacing:.14em;font-weight:750}
+.sa-tire-maq-heading h2{margin:7px 0!important;font-size:21px!important;color:#f4fff8!important;font-weight:800}
+.sa-tire-maq-heading p{font-size:12px;color:#c1d7cb;line-height:1.6;margin:0}
+.sa-tire-maq-x{height:33px;width:33px;border-radius:9px;color:#e9f6ed;border:1px solid rgba(190,235,207,.2);background:rgba(255,255,255,.065)}
+#sa-tire-maq-form label{display:block;color:#d5efe0;font-size:12px;font-weight:700;margin:0 0 8px}
+#sa-tire-maq-value{width:100%;height:45px;padding:10px 12px;border-radius:12px;border:1px solid rgba(173,228,190,.32);outline:0;background:rgba(255,255,255,.075);color:#fff;font-size:15px;font-weight:700;letter-spacing:.035em}
+#sa-tire-maq-value:focus{border-color:#8be5b4;box-shadow:0 0 0 3px rgba(114,218,157,.13)}
+#sa-tire-maq-message{font-size:12px;line-height:1.5;min-height:20px;margin-top:11px;color:#bbdace}
+#sa-tire-maq-message.is-error{color:#ffb9b5}#sa-tire-maq-message.is-success{color:#9df0bd}
+.sa-tire-maq-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
+.sa-tire-maq-actions button{padding:11px 15px;border-radius:11px;font-weight:750;font-size:12px}
+.sa-tire-maq-cancel{background:rgba(255,255,255,.06);color:#e7f6ec;border:1px solid rgba(196,230,207,.23)}
+.sa-tire-maq-save{background:linear-gradient(135deg,#69dfa0,#34ac71);color:#102b1d;border:1px solid rgba(195,250,216,.34)}
+.sa-tire-maq-save:disabled{opacity:.6;cursor:wait}
+</style>
 </head>
  <body data-template-id="__page-root" class="w-full full-vh bg-slate-50" style="background: rgb(241, 245, 249);">
 <script>window.__saApplyBodyTheme&&window.__saApplyBodyTheme();</script>
@@ -6077,6 +6096,7 @@ window.addEventListener('message', async function(event){
 
  function active(){return typeof supabaseClient!=='undefined'&&!!supabaseClient;}
  function isAdmin(){return typeof currentUserRole!=='undefined'&&currentUserRole==='admin';}
+ function canCorrectMAQ(r){return isAdmin()||(typeof currentUser!=='undefined'&&currentUser?.id===r.createdBy)}
  function dateToday(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
  function syncStatus(msg,err=false){const e=$('sa-tire-sync-status');if(e){e.textContent=msg;e.style.color=err?'#ffc4bd':'#b4cfc0';}}
  async function fetchPages(table,fields){
@@ -6094,12 +6114,12 @@ window.addEventListener('message', async function(event){
   busy=true;syncStatus('Sincronizando remessas de pneus...');
   try{
    const [ships,returns]=await Promise.all([
-    fetchPages('sa_tire_shipments','id,sent_date,supplier,patrimony,out_nf,responsible,notes,items,created_at'),
+    fetchPages('sa_tire_shipments','id,sent_date,supplier,patrimony,out_nf,responsible,notes,items,created_by,created_at'),
     fetchPages('sa_tire_returns','id,shipment_id,item_index,qty,returned_on,return_nf,created_at')
    ]);
    const map=new Map();
    for(const r of returns){const k=r.shipment_id+':'+r.item_index;if(!map.has(k))map.set(k,[]);map.get(k).push({qty:Number(r.qty),date:r.returned_on,nf:r.return_nf})}
-   records=ships.map(s=>({id:s.id,date:s.sent_date,supplier:s.supplier,patrimony:s.patrimony,nf:s.out_nf,owner:s.responsible,notes:s.notes,items:(Array.isArray(s.items)?s.items:[]).map((it,i)=>{
+   records=ships.map(s=>({id:s.id,createdBy:s.created_by,date:s.sent_date,supplier:s.supplier,patrimony:s.patrimony,nf:s.out_nf,owner:s.responsible,notes:s.notes,items:(Array.isArray(s.items)?s.items:[]).map((it,i)=>{
      const history=map.get(s.id+':'+i)||[];return {...it,qty:Number(it.qty)||0,returned:history.reduce((a,x)=>a+x.qty,0),history};
    })}));
    saTireRender();syncStatus('Atualizado no Supabase às '+new Date().toLocaleTimeString('pt-BR'));
@@ -6114,10 +6134,44 @@ window.addEventListener('message', async function(event){
   $('sa-tire-kpi-total').textContent=records.length;$('sa-tire-kpi-sent').textContent=total;$('sa-tire-kpi-pending').textContent=total-returned;$('sa-tire-kpi-returned').textContent=returned;
   const rows=records.filter(r=>(!status||getStatus(r)===status)&&(!q||[r.nf,r.patrimony,r.supplier,r.owner,...r.items.flatMap(x=>[x.measure,x.brand,x.identification,x.defect])].join(' ').toLowerCase().includes(q))).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   $('sa-tire-empty').hidden=rows.length>0;
-  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${isAdmin()?`<button type="button" onclick="saTireEdit('${r.id}')">✎ Editar</button><button type="button" onclick="saTireDelete('${r.id}')">Excluir</button>`:""}</td></tr>`}).join('');
+  $('sa-tire-body').innerHTML=rows.map(r=>{const t=sums(r);const st=getStatus(r);return `<tr><td>${fmt(r.date)}</td><td>${escT(r.nf)}</td><td><strong>${escT(r.patrimony)}</strong></td><td>${escT(r.supplier)}</td><td>${t.total}</td><td>${t.returned}</td><td>${t.total-t.returned}</td><td><span class="sa-tire-pill ${st==='Finalizada'?'done':''}">${st}</span></td><td><button type="button" onclick="saTireDetail('${r.id}')">◉ Detalhes / retorno</button>${canCorrectMAQ(r)?`<button type="button" onclick="saTireCorrectMAQ('${r.id}')">✎ Corrigir MAQ</button>`:""}${isAdmin()?`<button type="button" onclick="saTireEdit('${r.id}')">✎ Editar</button><button type="button" onclick="saTireDelete('${r.id}')">Excluir</button>`:""}</td></tr>`}).join('');
  };
  let editing=null;
  window.saTireOpenForm=function(){saTireFeedbackReset();editing=null;$('sa-tire-form').reset();$('sa-tire-form-items').innerHTML='';$('sa-tire-form-title').textContent='Nova Remessa de Pneus';$('sa-tire-date').value=dateToday();saTireSetMode(false);saTireAddItem();$('sa-tire-form-modal').classList.remove('hidden')};
+
+ window.saTireCorrectMAQ=function(id){
+  const r=byId(id);
+  if(!r||!canCorrectMAQ(r))return;
+  const existing=$('sa-tire-correct-maq-modal');if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.id='sa-tire-correct-maq-modal';overlay.className='modal-overlay';
+  overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');
+  overlay.innerHTML='<div class="sa-tire-maq-dialog"><div class="sa-tire-maq-heading"><div><small>CORREÇÃO DE CADASTRO</small><h2>✎ Corrigir patrimônio</h2><p>Apenas o número do MAQ, IMP ou VEC será alterado. Documentos e retornos permanecem intactos.</p></div><button type="button" class="sa-tire-maq-x" aria-label="Fechar">✕</button></div><form id="sa-tire-maq-form"><label for="sa-tire-maq-value">Patrimônio correto</label><input id="sa-tire-maq-value" required minlength="3" maxlength="70" autocomplete="off" placeholder="Ex.: MAQ1234"><div id="sa-tire-maq-message" role="status" aria-live="polite"></div><div class="sa-tire-maq-actions"><button type="button" class="sa-tire-maq-cancel">Cancelar</button><button type="submit" class="sa-tire-maq-save">Salvar alteração</button></div></form></div>';
+  document.body.appendChild(overlay);
+  const input=overlay.querySelector('#sa-tire-maq-value'),status=overlay.querySelector('#sa-tire-maq-message'),submit=overlay.querySelector('.sa-tire-maq-save');
+  input.value=r.patrimony||'';
+  let inProgress=false;
+  const close=()=>{if(!inProgress)overlay.remove()};
+  overlay.querySelector('.sa-tire-maq-x').onclick=close;
+  overlay.querySelector('.sa-tire-maq-cancel').onclick=close;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+  overlay.querySelector('form').addEventListener('submit',async e=>{
+   e.preventDefault();if(inProgress)return;
+   const value=input.value.trim().toUpperCase();
+   if(!/^(MAQ|IMP|VEC)[A-Z0-9-]+$/.test(value)){status.textContent='Informe um código válido começando com MAQ, IMP ou VEC.';status.className='is-error';return}
+   if(value===String(r.patrimony||'').toUpperCase()){close();return}
+   inProgress=true;submit.disabled=true;submit.textContent='Salvando...';status.className='';status.textContent='Atualizando patrimônio no Supabase...';
+   try{
+    const {error}=await supabaseClient.rpc('sa_tire_correct_patrimony',{p_shipment_id:r.id,p_patrimony:value});
+    if(error)throw error;
+    r.patrimony=value;saTireRender();
+    status.textContent='✓ Patrimônio corrigido com sucesso!';status.className='is-success';
+    submit.textContent='Salvo ✓';
+    setTimeout(()=>overlay.remove(),1200);
+   }catch(err){console.error('Correção de patrimônio',err);status.textContent='Não foi possível alterar: '+(err?.message||err);status.className='is-error';submit.disabled=false;submit.textContent='Salvar alteração';inProgress=false}
+  });
+  input.focus();input.select();
+ };
  window.saTireEdit=function(id){
   if(!isAdmin())return alert('Somente o administrador pode editar remessas.');
   const r=byId(id);if(!r)return alert('Remessa não encontrada. Atualize a lista.');
