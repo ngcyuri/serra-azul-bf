@@ -212,6 +212,9 @@ html,body{min-height:100%;background:transparent!important}
 main{padding:16px 10px 50px!important}
 .hero{margin-top:0}
 @media(max-width:780px){main{padding:8px 0 32px!important}}
+</style><style id="sa-pdf-autoheight">
+html,body{height:auto!important;min-height:0!important;overflow-x:hidden!important;overflow-y:hidden!important;scrollbar-width:none!important}
+body::-webkit-scrollbar,html::-webkit-scrollbar{display:none!important}
 </style></head><body class="beta2"><div class="top"><div><span class="kicker">GESTÃO DE MATERIAIS · SERRA AZUL BF</span><div class="brand">Almoxarifado</div><small>Entrada Inteligente por PDF · acabamento premium</small></div><span class="tag">ENTRADA INTELIGENTE PDF</span></div>
 <div class="layout"><aside><strong>ALMOXARIFADO</strong><small>PAINEL OPERACIONAL</small><nav><div class="item">📊 Painel Operacional</div><div class="item">📦 Estoque Virtual</div><div class="item">📁 Notas Finalizadas</div><div class="item">🕒 Peças Antigas</div><div class="item active">✚ Cadastro de Entrada</div><div class="item">🔎 Consulta de Mercadorias</div></nav><footer>Versão de demonstração VERSÃO OFICIAL.<p>Sem login, sem banco de dados e sem gravação no Supabase. O objetivo aqui é validar leitura e conferência visual.</p></footer></aside>
 <main><header class="hero"><div><span class="kicker">⚡ CADASTRO DE ENTRADA</span><h1>Entrada Inteligente por PDF</h1><p>Importe o pedido de compra, confira os materiais e prepare a entrada em um único fluxo, com clareza e segurança.</p><div class="hero-features"><span>Leitura de PDF digital</span><span>Conferência editável</span><span>Mesmo fluxo da entrada atual</span></div></div><span class="pill">Liquid Glass · Serra Azul</span></header>
@@ -346,5 +349,27 @@ $('prepare').onclick=()=>{const f=formData(),msg=valid(f);if(msg){$('output').cl
      }catch(e){console.error('Falha ao transferir rascunho',e)}
    },0);
  });
+})();
+</script><script id="sa-pdf-height-bridge">
+(function(){
+ let last=0;
+ function report(){
+  const content=document.querySelector('main');
+  const body=document.body,root=document.documentElement;
+  const height=Math.ceil(Math.max(content?content.getBoundingClientRect().bottom:0,body.scrollHeight,root.scrollHeight))+12;
+  if(height>0&&height!==last){
+   last=height;
+   if(window.parent!==window)window.parent.postMessage({type:'SERRA_AZUL_PDF_RESIZE',height},location.origin);
+  }
+ }
+ if(typeof ResizeObserver==='function'){
+  const observer=new ResizeObserver(report);
+  for(const el of [document.querySelector('main'),document.querySelector('.layout'),document.body])if(el)observer.observe(el);
+ }
+ window.addEventListener('load',report);
+ document.addEventListener('DOMContentLoaded',report);
+ window.addEventListener('input',()=>requestAnimationFrame(report),true);
+ window.addEventListener('click',()=>requestAnimationFrame(report),true);
+ report();
 })();
 </script></body></html>
